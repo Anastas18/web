@@ -1,0 +1,430 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Sulphur Point', sans-serif;
+    background-color: #F9FAFB;
+}
+
+/* header */
+.header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 15px 40px;
+    background-color: rgba(146, 198, 218, 1);
+    box-sizing: border-box;
+    border-bottom: 1px solid #e5e7eb; 
+}
+.icon_name {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 0 40px;
+    flex-grow: 1;
+}
+img.iconTAM {
+    width: 50px;
+    height: 50px;
+}
+.app_title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+.title_task {
+    font-size: 22px;
+    font-weight: 700;
+    color: rgba(249, 250, 251, 1);
+}
+.task_p_color {
+    color: #3B82F6;
+}
+.title_manager {
+    font-size: 22px;
+    font-weight: 400;
+    color: rgba(249, 250, 251, 1);
+}
+.under_p_service_g {
+    flex-grow: 5;
+    display: none;
+    justify-content: flex-start;
+}
+.under_p_service_u {
+    flex-grow: 5;
+    display: flex;
+    justify-content: flex-start;
+}
+.panel_service.guest, .panel_service.user {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    padding: 0;
+    font-size: 20px;
+    justify-content: space-evenly;
+    width: 80%;
+    gap: 20px;
+    
+}
+a.p_service {
+    color: rgba(249, 250, 251, 1);
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-decoration: none;
+    font-weight: 600;
+}
+a.p_service:hover {
+    color: #3B82F6;
+}
+.user_panel {
+    display: flex;
+    align-items: center;
+    background-color: #3B82F6;
+    border-radius: 12px;
+    padding: 8px 16px;
+    gap: 10px;
+}
+img.iconUser {
+    width: 24px;
+    filter: brightness(0) invert(1);
+}
+
+a.p_service.user_name_p {
+    color: #ffffff; 
+    font-weight: 700;
+}
+
+button.button_logout {
+   display: flex; 
+}
+
+
+/* main index */
+
+.index {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-direction: column;
+    gap: 60px;
+    padding: 60px 0; 
+}
+
+.main_text_img, .quote_img {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    width: 90%;
+    max-width: 1200px; 
+    gap: 40px;
+    flex-wrap: wrap;
+}
+.main_text, .div_quote {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    border-radius: 24px;
+    background-color: rgba(238, 241, 250, 1);
+    flex: 1; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    min-height: 150px;
+}
+.main_text {
+    align-items: flex-start;
+}
+p.title_main {
+    font-weight: 700;
+    font-size: 42px; 
+    color: #3B82F6;
+    margin: 0 0 15px 0;
+}
+p.text_main {
+    color: rgba(83, 165, 255, 1);
+    font-size: 22px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+button.button_getstart, .button_logout{
+    background-color: #3B82F6;
+    border: none;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 20px;
+    padding: 10px 24px;
+    transition: background-color 0.2s ease;
+}
+.button_getstart{
+    font-weight: 700;
+}
+.button_hover:hover {
+    background-color: #2563EB;
+    cursor: pointer;
+}
+.user_p_b {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+}
+.img_main, .div_img {
+    border-radius: 24px;
+    flex: 1.2; 
+    overflow: hidden;
+}
+img.img_home1, img.img_home2 {
+    width: 100%;
+    display: block;
+    border-radius: inherit;
+}
+.our_pros {
+    background-color: rgba(238, 241, 250, 1);
+    border-radius: 24px;
+    padding: 40px;
+    width: 90%;
+    max-width: 1110px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+p.p_title_pros {
+    color: #3B82F6;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 30px 0;
+}
+.title_pros {
+    width: 100%;
+    text-align: center;
+}
+.cards_of_pros {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    width: 100%;
+}
+.card_pros {
+    background-color: rgba(197, 239, 255, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    border-radius: 20px;
+    max-width: 280px;
+}
+p.card_title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3B82F6;
+    margin: 0 0 10px 0;
+}
+p.card_text {
+    font-size: 20px;
+    color:rgba(83, 165, 255, 1);
+    line-height: 1.5;
+    margin: 0;
+}
+.div_quote {
+    align-items: center;
+}
+p.quote_text {
+    font-size: 36px;
+    font-weight: 700;
+    color: #3B82F6;
+    text-align: center;
+    line-height: 1.4;
+    margin: 0;
+}
+.our_pros_div {
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* footer */
+.footer {
+    width: 100%;
+    background-color: #92C6DA; 
+    color: #ffffff; 
+    padding: 40px 0; 
+    box-sizing: border-box;
+}
+
+.div_footer {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start; 
+    flex-wrap: wrap; 
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.footer .icon_name {
+    margin: 0; 
+    flex-grow: 0;
+}
+
+.footer_el_div {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.footer_title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 10px 0; 
+}
+
+.footer_div_text {
+    display: flex;
+    align-items: center; 
+    gap: 10px;
+}
+
+.iconsfooter {
+    width: 25px;
+    height: 25px;
+    filter: brightness(0) invert(1);
+}
+
+.footer_text, a.footer_text {
+    font-size: 20px;
+    margin: 0;
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a.footer_text:hover {
+    color: #3B82F6;
+}
+.burger-menu {
+    display: none; 
+    flex-direction: column;
+    justify-content: space-around;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+}
+
+.burger-bar {
+    width: 2rem;
+    height: 0.25rem;
+    background-color: #ffffff;
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+/* ============================================ */
+/* ============== АДАПТИВНІСТЬ ============== */
+/* ============================================ */
+
+@media (max-width: 1100px) {
+    .main_text_img, .quote_img {
+        flex-direction: column; 
+        align-items: stretch;   
+        gap: 30px;
+    }
+    .main_text, .img_main, .div_quote, .div_img {
+        width: 100%; 
+        max-width: 100%;
+        flex: none;
+    }
+    .our_pros {
+        width: 90%; 
+    }
+    .main_text{
+        padding: 0;
+    }
+    .cards_of_pros {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    .card_pros {
+        width: 100%; 
+        max-width: 450px; 
+    }
+    .div_quote{
+        padding: 10px 0;
+    }
+    p.title_main, .p.text_main, button.button_getstart{
+        margin: 20px;
+    }
+    p.title_main { font-size: 38px; }
+    p.p_title_pros, p.quote_text { font-size: 34px; }
+    p.text_main {
+        font-size: 20px;
+        width: 90%;
+        margin-left: 20px;}
+    p.card_title, .footer_title { font-size: 22px; }
+    p.card_text, .footer_text, a.footer_text { font-size: 18px; }
+    button.button_getstart, .button_logout { font-size: 18px; }
+    .panel_service.guest, .panel_service.user { font-size: 18px; }
+
+    .div_footer {
+        flex-direction: column; 
+        align-items: center;    
+        gap: 40px;              
+    }
+
+    .footer_el_div {
+        align-items: center; 
+    }
+}
+
+@media (max-width: 1320px) {
+    .header {
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .burger-menu {
+        display: flex; 
+    }
+
+    .under_p_service_u {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #f9fafb;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .under_p_service_u.active {
+        display: block;
+    }
+
+    .panel_service.user {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+        width: 100%;
+    }
+    
+    .panel_service.user a.p_service {
+        color: #374151;
+        padding: 10px 0; 
+    }
+    .panel_service.user a.p_service:hover {
+        color: #3B82F6;
+    }
+    #name_u_footer{
+        color: #ffffff;
+    }
+    button.button_logout {
+        padding: 20px;
+    }
+}
