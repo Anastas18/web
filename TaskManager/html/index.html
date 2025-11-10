@@ -44,10 +44,14 @@
                     <div class="user_panel button_hover">
                         <img src="../static/images/user.svg" alt="" class="iconUser">
                         <a class="p_service user_name_p" id="name_u_footer">Name</a>
+                        <div class="admin_div">
+                        <a href="admin.html" class="admin_a">Admin_panel</a>
+                </div>
                     </div>
                     <button class="button_logout button_hover">Вийти</button>
+                    
                 </div>
-
+                
             </div>
         </div>
     </header>
@@ -149,6 +153,32 @@
         burgerMenu.addEventListener('click', () => {
             navMenu.classList.toggle('active');
         });
+
+        const user_panel = document.querySelector('.user_panel');
+        // 2. Знаходимо панель (яку показуємо)
+        const admin_panel = document.querySelector('.admin_div');
+
+        // 3. При кліку на .user_panel
+        user_panel.addEventListener('click', () => {
+            // Перемикаємо клас 'active' на адмін-панелі
+            admin_panel.classList.toggle('active');
+        });
+
+        // 4. (БОНУС) Ховаємо панель, якщо клікнути будь-де поза нею
+        window.addEventListener('click', (event) => {
+            
+            // Якщо клік був на самій кнопці .user_panel (або всередині неї)
+            // то нічого не робимо, виходимо.
+            if (user_panel.contains(event.target)) {
+                return;
+            }
+
+            // Якщо клік був НЕ всередині адмін-панелі,
+            // то ми її ховаємо.
+            if (!admin_panel.contains(event.target)) {
+                admin_panel.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>

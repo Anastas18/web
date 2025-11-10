@@ -1,0 +1,249 @@
+
+.title_div {
+    width: 90%;
+    color: rgba(0, 122, 255, 1);
+    font-size: 35px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+p.p_title {
+    margin: 0;
+    padding: 0;
+}
+.navi_panel {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 30px;
+    width: 90%;
+}
+.navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(238, 241, 250, 1);
+    min-width: 380px;
+    min-height: 460px;
+    border-radius: 16px;
+    flex-grow: 1;
+
+}
+.tittle_navi {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background-color: rgba(197, 239, 255, 1);
+    border-radius: 16px;
+    font-size: 30px;
+    padding: 15px 0;
+}
+img.iconTAM.smallerIcon {
+    width: 40px;
+    height: 40px;
+}
+p.p_navi {
+    color: rgba(0, 122, 255, 1);
+    margin: 0;
+    padding: 0;
+}
+.navi_buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 30px;
+    margin-top: 30px;
+}
+button.navi_but {
+    width: 80%;
+    border: none;
+    background-color: rgba(55, 144, 242, 1);
+    color: white;
+    font-size: 23px;
+    border-radius: 14px;
+    padding: 10px 0;
+}
+
+img.icon_loupe {
+    width: 20px;
+    cursor: pointer;
+}
+.panel {
+    flex-grow: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    background-color: rgba(238, 241, 250, 1);
+    border-radius: 16px;
+    padding-bottom: 25px;
+    max-height: 435px;
+}
+.tittle_panel{
+    width: 100%;
+    background: rgba(197, 239, 255, 1);
+    display: flex;
+    justify-content: space-between;
+    border-radius: 16px;
+}
+p.p_panel {
+    color: rgba(0, 122, 255, 1);
+    font-size: 30px;
+    margin: 0 15px;
+    padding: 14px;
+    width: 30%;
+}
+.search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70%;
+}
+input.input_panel {
+    border: 0;
+    background-color: white;
+    font-size: 15px;
+    border-radius: 16px 0 0 16px;
+    padding: 10px 0 10px 23px;
+    min-width: 300px;
+    width: 80%;
+    outline: none;
+}
+button.loupe_but {
+    background: rgba(0, 122, 255, 1);
+    border: 0;
+    border-radius: 0 16px 16px 0px;
+    padding: 7px 10px;
+}
+.inf_panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 95%;
+    gap: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.inf_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    min-width: 200px;
+    min-height: 100px;
+    color: rgba(0, 122, 255, 1);
+    font-size: 22px;
+}
+.no_m {
+    margin: 0;
+}
+.users_panel {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 15px;
+}
+.user_div {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 90%;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 3px 4px 5px 0px #00000069;
+    font-size: 17px;
+    margin: 10px;
+}
+button.delete_btn_u {
+    border: 0;
+    background: rgba(254, 82, 51, 1);
+    color: white;
+    border-radius: 12px;
+    font-size: 16px;
+    padding: 7px 18px;
+    cursor: pointer;
+}
+button.delete_btn_u:hover{
+    background: rgb(200 62 38);
+}
+.tasks_cards {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 98%;
+    margin: 0 0 20px 0;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 10px;
+}
+.task_card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+}
+.task_card p.name_p {
+    color: #3B82F6;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+.task_card p.inf_p {
+    color: #374151;
+    font-size: 17px;
+    margin: 0;
+}
+.task_card .button_edit,
+.task_card .button_delete {
+    border: none;
+    border-radius: 7px;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+
+.task_card .button_edit {
+    background-color: #3B82F6; 
+}
+
+.task_card .button_edit:hover {
+    background-color: #2563EB;
+}
+
+.task_card .button_delete {
+    background-color: #EF4444;
+}
+
+.task_card .button_delete:hover {
+    background-color: #DC2626;
+}
+@media (max-width: 1100px) {
+    .navi_panel {
+        flex-direction: column;
+        align-items: center;
+    }
+}

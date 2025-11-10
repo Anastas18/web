@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title class="title_TAM">Task An Manager</title>
+    <link rel="icon" type="image/png" href="../static/images/IconTAM.svg">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/tasks.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sulphur+Point:wght@300;400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <header class="header">
+        <div class="icon_name">
+            <img src="../static/images/IconTAM.svg" alt="" class="iconTAM">
+            <div class="app_title">
+                <span class="title_task"><span class="task_p_color">Task</span> An</span>
+                <span class="title_manager">Manager</span>
+            </div>
+        </div>
+        <button class="burger-menu" id="burger-menu">
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+        </button>
+        <div class="under_p_service_g">
+            <div class="panel_service guest">
+                <a class="p_service main" href="index.html">Головна</a>
+                <a class="p_service tasks" href="tasks.html">Завдання</a>
+                <a class="p_service calendar" href="calendar.html">Календар</a>
+                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
+                <a class="p_service login" href="loginsignup.html">Вхід/Реєстрація</a>
+            </div>
+        </div>
+        <div class="under_p_service_u" id="nav-menu">
+            <div class="panel_service user">
+                <a class="p_service main" href="index.html">Головна</a>
+                <a class="p_service tasks" href="tasks.html">Завдання</a>
+                <a class="p_service calendar" href="calendar.html">Календар</a>
+                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
+                <div class="user_p_b">
+                    <div class="user_panel button_hover">
+                        <img src="../static/images/user.svg" alt="" class="iconUser">
+                        <a class="p_service user_name_p" id="name_u_footer">Name</a>
+                    </div>
+                    <button class="button_logout button_hover">Вийти</button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+    <main class="index">
+        <div class="add_category_background">
+            <div class="add_category">
+                <p class="inf_card add_name">Назва категорії</p>
+                <input type="text" placeholder="Name" class="inout_add_card">
+                <button class="button_save_card">
+                    Зберегти
+                </button>
+            </div>
+        </div>
+        <div class="add_task_background">        
+            <div class="add_task">
+                <div class="p_input">
+                    <p class="inf_card add_name">Name</p>
+                    <input type="text" placeholder="Name" class="inout_add_card">
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Deadline</p>
+                    <input type="text" placeholder="Deadline" class="inout_add_card">
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Priority</p>
+                    <input type="text" placeholder="Priority" class="inout_add_card">
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Сategory</p>
+                    <input type="text" placeholder="Сategory" class="inout_add_card">
+                </div>
+                <button class="button_save_card">
+                    Зберегти
+                </button>
+            </div>
+        </div>
+        <div class="divs">
+            <div class="panel_buttons">
+                <div class="tittle_buttons">
+                    <p class="p_tittle_b">Find. Create. Sort</p>
+                </div>
+                <div class="buttons_div">
+                    <div class="but_div">
+                        <img src="../static/images/loupe.svg" alt="" class="img_scr">
+                        <input type="text" placeholder="Що шукаємо?" class="input_p">
+                    </div>
+                    <div class="filter-dropdown-container">
+                        <div class="but_div filter-button" id="filter-toggle-btn">
+                            <p class="p_filtr">Це що фільтр?</p>
+                            <img src="../static/images/Polygon 1.svg" alt="" class="img_scr arrow-down">
+                        </div>
+                        
+                        <div class="filter-dropdown-menu" id="filter-menu">
+                            <a href="#" class="dropdown-item" data-filter="date_new">Спочатку нові</a>
+                            <a href="#" class="dropdown-item" data-filter="date_new">За категорією</a>
+                            <a href="#" class="dropdown-item" data-filter="date_old">Спочатку з вищим пріорітетом</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item danger" data-filter="none">Скинути фільтр</a>
+                        </div>
+                    </div>
+                    <div class="but_div">
+                        <button class="button_p button_category">Створити категорію</button>
+                    </div>
+                    <div class="but_div">
+                        <button class="button_p button_add">
+                            <img src="../static/images/plus.svg" alt="" class="img_scr">
+                            Щось нове
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel_tasks">
+                <div class="tittle_buttons">
+                    <p class="p_tittle_b">Your tasks</p>
+                </div>
+                <div class="tasks_cards">
+                    <div class="task_card">
+                    <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                    <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="div_footer">
+            <div class="icon_name">
+                <img src="../static/images/IconTAM.svg" alt="" class="iconTAM">
+                <div class="app_title">
+                    <span class="title_task"><span class="task_p_color">Task</span> An</span>
+                    <span class="title_manager">Manager</span>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Developer</p>
+                <div class="footer_div_text">
+                    <img src="../static/images/mail.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Eugenkucha2006@gmail.com</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/github.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Anastas18</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/telegram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Evgen35a</p>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Contact Us</p>
+                <div class="footer_div_text">
+                    <img src="../static/images/telegram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/instagram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/mail.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Service</p>
+                <a href="index.html" class="footer_text">Home</a>
+                <a href="tasks.html" class="footer_text">Tasks</a>
+                <a href="calendar.html" class="footer_text">Calendar</a>
+                <a href="aboutapp.html" class="footer_text">About app</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+
+        // burger-menu
+        const burgerMenu = document.getElementById('burger-menu');
+        const navMenu = document.querySelector('.under_p_service_u'); 
+
+        burgerMenu.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // add task
+        const add_task_back = document.querySelector('.add_task_background');
+        const add_task = document.querySelector('.add_task');
+        const add_task_btn = document.querySelector('.button_add');
+
+        add_task_btn.addEventListener('click', () => {
+            add_task_back.classList.toggle('active');
+        })
+        window.addEventListener('click', (event) => {
+            if (add_task_btn.contains(event.target)) {
+                return; 
+            }
+            if(!add_task.contains(event.target)){
+                if(add_task_back.classList.contains('active')){
+                    add_task_back.classList.remove('active');
+                }
+            }
+        });
+
+        // add category
+        const add_category_background = document.querySelector('.add_category_background');
+        const add_category = document.querySelector('.add_category');
+        const button_category = document.querySelector('.button_category');
+
+        button_category.addEventListener('click', () => {
+            add_category_background.classList.toggle('active');
+        })
+        window.addEventListener('click', (event) => {
+            if (button_category.contains(event.target)) {
+                return; 
+            }
+            if(!add_category.contains(event.target)){
+                if(add_category_background.classList.contains('active')){
+                    add_category_background.classList.remove('active');
+                }
+            }
+        });
+
+        // filter
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const filterBtn = document.getElementById('filter-toggle-btn');
+            const filterMenu = document.getElementById('filter-menu');
+            
+            if (filterBtn && filterMenu) {
+                const filterArrow = filterBtn.querySelector('.arrow-down');
+
+                filterBtn.addEventListener('click', () => {
+                    filterMenu.classList.toggle('show');
+                    filterArrow.classList.toggle('rotated');
+                });
+                window.addEventListener('click', (event) => {
+                    if (!filterBtn.contains(event.target) && !filterMenu.contains(event.target)) {
+                        if (filterMenu.classList.contains('show')) {
+                            filterMenu.classList.remove('show');
+                            filterArrow.classList.remove('rotated');
+                        }
+                    }
+                });
+                filterMenu.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('dropdown-item')) {
+
+                        // тут буду додавати фільтрацію
+                        filterMenu.classList.remove('show');
+                        filterArrow.classList.remove('rotated');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

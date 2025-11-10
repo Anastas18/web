@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title class="title_TAM">Task An Manager</title>
+    <link rel="icon" type="image/png" href="../static/images/IconTAM.svg">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sulphur+Point:wght@300;400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <header class="header">
+        <div class="icon_name">
+            <img src="../static/images/IconTAM.svg" alt="" class="iconTAM">
+            <div class="app_title">
+                <span class="title_task"><span class="task_p_color">Task</span> An</span>
+                <span class="title_manager">Manager</span>
+            </div>
+        </div>
+        <button class="burger-menu" id="burger-menu">
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+        </button>
+        <div class="under_p_service_g">
+            <div class="panel_service guest">
+                <a class="p_service main" href="index.html">Головна</a>
+                <a class="p_service tasks" href="tasks.html">Завдання</a>
+                <a class="p_service calendar" href="calendar.html">Календар</a>
+                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
+                <a class="p_service login" href="loginsignup.html">Вхід/Реєстрація</a>
+            </div>
+        </div>
+        <div class="under_p_service_u" id="nav-menu">
+            <div class="panel_service user">
+                <a class="p_service main" href="index.html">Головна</a>
+                <a class="p_service tasks" href="tasks.html">Завдання</a>
+                <a class="p_service calendar" href="calendar.html">Календар</a>
+                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
+                <div class="user_p_b">
+                    <div class="user_panel button_hover">
+                        <img src="../static/images/user.svg" alt="" class="iconUser">
+                        <a class="p_service user_name_p" id="name_u_footer">Name</a>
+                        <div class="admin_div">
+                        <a href="admin.html" class="admin_a">Admin_panel</a>
+                </div>
+                    </div>
+                    <button class="button_logout button_hover">Вийти</button>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </header>
+    <main class="index">
+        <div class="title_div"><p class="p_title">Admin Panel</p></div>
+        <div class="navi_panel">
+            <div class="navigation">
+                <div class="tittle_navi">
+                    <img src="../static/images/IconTAM.svg" alt="" class="iconTAM smallerIcon">
+                    <p class="p_navi">Навігація</p>
+                </div>
+                <div class="navi_buttons">
+                    <button class="navi_but button_hover" id="dashbtn">Дашборд</button>
+                    <button class="navi_but button_hover" id="usersbtn">Користувачі</button>
+                    <button class="navi_but button_hover" id="tasksbtn">Завдання</button>
+                    <button class="navi_but button_hover" id="categorybtn">Категорії</button>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="tittle_panel dash">
+                    <p class="p_panel dash">Дашборд</p>
+                </div>
+                <div class="tittle_panel users">
+                    <p class="p_panel users">Користувачі</p>
+                    <div class="search">
+                        <input type="text" placeholder="Пошук користувача" class="input_panel">
+                        <button class="loupe_but button_hover">
+                            <img src="../static/images/loupe.svg" alt="" class="icon_loupe">
+                        </button>
+                    </div>
+                </div>
+                <div class="tittle_panel tasks">
+                    <p class="p_panel tasks">Завдання</p>
+                    <div class="search">
+                        <input type="text" placeholder="Пошук завдань користувача" class="input_panel">
+                        <button class="loupe_but button_hover">
+                            <img src="../static/images/loupe.svg" alt="" class="icon_loupe">
+                        </button>
+                    </div>
+                </div>
+                <div class="tittle_panel category">
+                    <p class="p_panel category">Категорії</p>
+                    <div class="search">
+                        <input type="text" placeholder="Пошук категорій користувача" class="input_panel">
+                        <button class="loupe_but button_hover">
+                            <img src="../static/images/loupe.svg" alt="" class="icon_loupe">
+                        </button>
+                    </div>
+                </div>
+                <div class="inf_panel dash">
+                    <div class="inf_div">
+                        <p class="name_inf no_m">Кількість користувачів: </p>
+                        <p class="inf_p no_m">120</p>
+                    </div>
+                    <div class="inf_div">   
+                        <p class="name_inf no_m">Кількість завдань: </p>
+                        <p class="inf_p no_m">120</p>
+                    </div>
+                    <div class="inf_div">
+                        <p class="name_inf no_m">Кількість категорій: </p>
+                        <p class="inf_p no_m">15</p>
+                    </div>
+                </div>
+                <div class="users_panel users">
+                    <div class="user_div">
+                        <p class="inf_u">ID: 2</p>
+                        <p class="inf_u">Name: name</p>
+                        <p class="inf_u">Email: example@gmail.com</p>
+                        <button class="delete_btn_u">Видалити</button>
+                    </div>
+                    <div class="user_div">
+                        <p class="inf_u">ID: 2</p>
+                        <p class="inf_u">Name: name</p>
+                        <p class="inf_u">Email: example@gmail.com</p>
+                        <button class="delete_btn_u">Видалити</button>
+                    </div>
+                    <div class="user_div">
+                        <p class="inf_u">ID: 2</p>
+                        <p class="inf_u">Name: name</p>
+                        <p class="inf_u">Email: example@gmail.com</p>
+                        <button class="delete_btn_u">Видалити</button>
+                    </div>
+                </div>
+                <div class="tasks tasks_cards">
+                    <div class="task_card">
+                    <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                    <p class="name_p">Name</p>
+                        <p class="inf_p">Deadline: </p>
+                        <p class="inf_p">Priority: </p>
+                        <p class="inf_p">Сategory: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                </div>
+                <div class="category tasks_cards">
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Tasks: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Tasks: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Tasks: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                    <div class="task_card">
+                        <p class="name_p">Name</p>
+                        <p class="inf_p">Tasks: </p>
+                        <button class="button_edit">Редагувати</button>
+                        <button class="button_delete">Видалити</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="div_footer">
+            <div class="icon_name">
+                <img src="../static/images/IconTAM.svg" alt="" class="iconTAM">
+                <div class="app_title">
+                    <span class="title_task"><span class="task_p_color">Task</span> An</span>
+                    <span class="title_manager">Manager</span>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Developer</p>
+                <div class="footer_div_text">
+                    <img src="../static/images/mail.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Eugenkucha2006@gmail.com</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/github.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Anastas18</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/telegram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Evgen35a</p>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Contact Us</p>
+                <div class="footer_div_text">
+                    <img src="../static/images/telegram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/instagram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/mail.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Service</p>
+                <a href="index.html" class="footer_text">Home</a>
+                <a href="tasks.html" class="footer_text">Tasks</a>
+                <a href="calendar.html" class="footer_text">Calendar</a>
+                <a href="aboutapp.html" class="footer_text">About app</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+    // --- Логіка бургер-меню та випадаючого меню (залишена без змін) ---
+    const burgerMenu = document.getElementById('burger-menu');
+    const navMenu = document.querySelector('.under_p_service_u'); 
+
+    burgerMenu.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    const user_panel = document.querySelector('.user_panel');
+    const admin_panel = document.querySelector('.admin_div');
+
+    user_panel.addEventListener('click', () => {
+        admin_panel.classList.toggle('active');
+    });
+
+    window.addEventListener('click', (event) => {
+        if (user_panel.contains(event.target)) {
+            return;
+        }
+        if (!admin_panel.contains(event.target)) {
+            admin_panel.classList.remove('active');
+        }
+    });
+
+    const dashbtn = document.getElementById('dashbtn');
+    const usersbtn = document.getElementById('usersbtn');
+    const tasksbtn = document.getElementById('tasksbtn');
+    const categorybtn = document.getElementById('categorybtn');
+
+    const dashTitle = document.querySelector('.tittle_panel.dash');
+    const usersTitle = document.querySelector('.tittle_panel.users');
+    const tasksTitle = document.querySelector('.tittle_panel.tasks');
+    const categoryTitle = document.querySelector('.tittle_panel.category');
+
+    const dashInfo = document.querySelector('.inf_panel.dash');
+    const usersInfo = document.querySelector('.users_panel.users');
+    const tasksInfo = document.querySelector('.tasks.tasks_cards');
+    const categoryInfo = document.querySelector('.category.tasks_cards');
+
+    function hideAllPanels() {
+        dashTitle.style.display = 'none';
+        usersTitle.style.display = 'none';
+        tasksTitle.style.display = 'none';
+        categoryTitle.style.display = 'none';
+
+        dashInfo.style.display = 'none';
+        usersInfo.style.display = 'none';
+        tasksInfo.style.display = 'none';
+        categoryInfo.style.display = 'none';
+    }
+
+    dashbtn.addEventListener('click', () => {
+        hideAllPanels(); 
+        dashTitle.style.display = 'flex'; 
+        dashInfo.style.display = 'flex';  
+    });
+
+    // Кнопка "Користувачі"
+    usersbtn.addEventListener('click', () => {
+        hideAllPanels(); 
+        usersTitle.style.display = 'flex'; 
+        usersInfo.style.display = 'flex'; 
+    });
+
+    // Кнопка "Завдання"
+    tasksbtn.addEventListener('click', () => {
+        hideAllPanels(); 
+        tasksTitle.style.display = 'flex';
+        tasksInfo.style.display = 'flex'; 
+    });
+
+    // Кнопка "Категорії"
+    categorybtn.addEventListener('click', () => {
+        hideAllPanels(); 
+        categoryTitle.style.display = 'flex';
+        categoryInfo.style.display = 'flex';  
+    });
+    dashbtn.click();
+</script>
+</body>
+</html>

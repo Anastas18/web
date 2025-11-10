@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title class="title_TAM">Task An Manager</title>
+    <link rel="icon" type="image/png" href="../static/images/IconTAM.svg">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sulphur+Point:wght@300;400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <header class="header">
+        <div class="icon_name">
+            <img src="../static/images/IconTAM.svg" alt="" class="iconTAM">
+            <div class="app_title">
+                <span class="title_task"><span class="task_p_color">Task</span> An</span>
+                <span class="title_manager">Manager</span>
+            </div>
+        </div>
+        <button class="burger-menu" id="burger-menu">
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+        </button>
+        <div class="under_p_service_g">
+            <div class="panel_service guest">
+                <a class="p_service main" href="index.html">Головна</a>
+                <a class="p_service tasks" href="tasks.html">Завдання</a>
+                <a class="p_service calendar" href="calendar.html">Календар</a>
+                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
+                <a class="p_service login" href="loginsignup.html">Вхід/Реєстрація</a>
+            </div>
+        </div>
+        <div class="under_p_service_u" id="nav-menu">
+            <div class="panel_service user">
+                <a class="p_service main" href="index.html">Головна</a>
+                <a class="p_service tasks" href="tasks.html">Завдання</a>
+                <a class="p_service calendar" href="calendar.html">Календар</a>
+                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
+                <div class="user_p_b">
+                    <div class="user_panel button_hover">
+                        <img src="../static/images/user.svg" alt="" class="iconUser">
+                        <a class="p_service user_name_p" id="name_u_footer">Name</a>
+                    </div>
+                    <button class="button_logout button_hover">Вийти</button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+    <main class="index">
+        <div class="register_login">
+            <div class="buttons_login_register">
+                <div class="login_button active"> 
+                    <p class="login_p">Log in</p>
+                </div>
+                <div class="register_button">
+                    <p class="register_p">Register</p>
+                </div>
+            </div>
+            <div class="register" id="register-form">
+                <div class="inputs">
+                    <p class="input_p">Username</p>
+                    <input type="text" placeholder="Name" class="input_input">
+                </div>
+                <div class="inputs">
+                    <p class="input_p">Email</p>
+                    <input type="text" placeholder="example@gmail.com" class="input_input">
+                </div>
+                <div class="inputs">
+                    <p class="input_p">Password</p>
+                    <input type="text" placeholder="password" class="input_input">
+                </div>
+                <div class="inputs">
+                    <p class="input_p">Confirm password</p>
+                    <input type="text" placeholder="password" class="input_input">
+                </div>
+                <div class="but_confirm">
+                    <button class="button_confirm">Create account</button>
+                </div>
+            </div>
+            <div class="login" id="login-form">
+                <div class="inputs">
+                    <p class="input_p">Email</p>
+                    <input type="text" placeholder="example@gmail.com" class="input_input">
+                </div>
+                <div class="inputs">
+                    <p class="input_p">Password</p>
+                    <input type="text" placeholder="password" class="input_input">
+                </div>
+                <div class="but_and_p">
+                    <button class="button_confirm">Log in</button>
+                    <p class="f_p">Forgot password?</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="div_footer">
+            <div class="icon_name">
+                <img src="../static/images/IconTAM.svg" alt="" class="iconTAM">
+                <div class="app_title">
+                    <span class="title_task"><span class="task_p_color">Task</span> An</span>
+                    <span class="title_manager">Manager</span>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Developer</p>
+                <div class="footer_div_text">
+                    <img src="../static/images/mail.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Eugenkucha2006@gmail.com</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/github.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Anastas18</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/telegram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">Evgen35a</p>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Contact Us</p>
+                <div class="footer_div_text">
+                    <img src="../static/images/telegram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/instagram.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager</p>
+                </div>
+                <div class="footer_div_text">
+                    <img src="../static/images/mail.svg" alt="" class="iconsfooter">
+                    <p class="footer_text">@TaskAnManager@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer_el_div">
+                <p class="footer_title">Service</p>
+                <a href="index.html" class="footer_text">Home</a>
+                <a href="tasks.html" class="footer_text">Tasks</a>
+                <a href="calendar.html" class="footer_text">Calendar</a>
+                <a href="aboutapp.html" class="footer_text">About app</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        const burgerMenu = document.getElementById('burger-menu');
+        const navMenu = document.querySelector('.under_p_service_u'); 
+
+        burgerMenu.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        const loginButton = document.querySelector('.login_button');
+        const registerButton = document.querySelector('.register_button');
+
+        const loginForm = document.getElementById('login-form'); 
+        const registerForm = document.getElementById('register-form'); 
+
+        loginButton.addEventListener('click', () => {
+            loginForm.style.display = 'flex';
+            registerForm.style.display = 'none';
+
+            loginButton.classList.add('active');
+            registerButton.classList.remove('active');
+        });
+
+        registerButton.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'flex';
+
+            registerButton.classList.add('active');
+            loginButton.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

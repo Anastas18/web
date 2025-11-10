@@ -87,16 +87,13 @@ img.iconUser {
     width: 24px;
     filter: brightness(0) invert(1);
 }
-
 a.p_service.user_name_p {
     color: #ffffff; 
     font-weight: 700;
 }
-
 button.button_logout {
    display: flex; 
 }
-
 
 /* main index */
 
@@ -108,7 +105,6 @@ button.button_logout {
     gap: 60px;
     padding: 60px 0; 
 }
-
 .main_text_img, .quote_img {
     display: flex;
     flex-direction: row;
@@ -167,6 +163,7 @@ button.button_getstart, .button_logout{
     align-items: center;
     justify-content: center;
     gap: 25px;
+    position: relative;
 }
 .img_main, .div_img {
     border-radius: 24px;
@@ -252,7 +249,6 @@ p.quote_text {
     padding: 40px 0; 
     box-sizing: border-box;
 }
-
 .div_footer {
     display: flex;
     justify-content: space-evenly;
@@ -262,36 +258,30 @@ p.quote_text {
     margin: 0 auto;
     gap: 20px;
 }
-
 .footer .icon_name {
     margin: 0; 
     flex-grow: 0;
 }
-
 .footer_el_div {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
-
 .footer_title {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 10px 0; 
 }
-
 .footer_div_text {
     display: flex;
     align-items: center; 
     gap: 10px;
 }
-
 .iconsfooter {
     width: 25px;
     height: 25px;
     filter: brightness(0) invert(1);
 }
-
 .footer_text, a.footer_text {
     font-size: 20px;
     margin: 0;
@@ -299,7 +289,6 @@ p.quote_text {
     text-decoration: none;
     transition: color 0.2s ease;
 }
-
 a.footer_text:hover {
     color: #3B82F6;
 }
@@ -315,7 +304,6 @@ a.footer_text:hover {
     padding: 0;
     z-index: 10;
 }
-
 .burger-bar {
     width: 2rem;
     height: 0.25rem;
@@ -325,6 +313,39 @@ a.footer_text:hover {
     position: relative;
     transform-origin: 1px;
 }
+
+.admin_div {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 42%;
+    margin-top: 8px; 
+    min-width: 160px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100; 
+    padding: 5px;
+    box-sizing: border-box;
+}
+.admin_div.active {
+    display: block;
+}
+.admin_a {
+    display: block;
+    padding: 8px 12px;
+    color: #374151;
+    text-decoration: none;
+    font-size: 20px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+        
+.admin_a:hover {
+    background-color: #f3f4f6;
+    color: #3B82F6;
+}
+
 /* ============================================ */
 /* ============== АДАПТИВНІСТЬ ============== */
 /* ============================================ */
@@ -371,7 +392,6 @@ a.footer_text:hover {
     p.card_text, .footer_text, a.footer_text { font-size: 18px; }
     button.button_getstart, .button_logout { font-size: 18px; }
     .panel_service.guest, .panel_service.user { font-size: 18px; }
-
     .div_footer {
         flex-direction: column; 
         align-items: center;    
@@ -388,11 +408,9 @@ a.footer_text:hover {
         justify-content: space-between;
         position: relative;
     }
-
     .burger-menu {
         display: flex; 
     }
-
     .under_p_service_u {
         display: none;
         position: absolute;
@@ -402,18 +420,17 @@ a.footer_text:hover {
         background-color: #f9fafb;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    
+
     .under_p_service_u.active {
         display: block;
     }
-
     .panel_service.user {
         flex-direction: column;
         align-items: center;
         padding: 20px 0;
         width: 100%;
     }
-    
+
     .panel_service.user a.p_service {
         color: #374151;
         padding: 10px 0; 

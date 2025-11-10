@@ -1,0 +1,335 @@
+
+img.img_scr {
+    width: 22px;
+}
+.divs {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-evenly;
+    flex-direction: row;
+    width: 90%;
+    gap: 40px;
+}
+.panel_buttons {
+    background: linear-gradient(332deg, rgba(197, 239, 255, 1), rgba(98, 173, 202, 1));
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 16px;
+    min-width: 310px;
+    min-height: 485px;
+}
+.tittle_buttons {
+    width: 100%;
+    text-align: center;
+    border-radius: 16px;
+    background-color: rgba(197, 239, 255, 1);
+    color: rgba(0, 122, 255, 1);
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+.buttons_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    gap: 20px;
+}
+.but_div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    border-radius: 16px;
+    background-color: #ffffff;
+    min-height: 50px;
+    gap: 20px;
+}
+input.input_p {
+    border: none;
+    outline: none;
+    font-size: 15px;
+    width: 50%;
+    margin: 0;
+    padding: 0;
+}
+p.p_filtr {
+    font-size: 15px;
+    color: rgba(115, 115, 115, 1);
+    width: 50%;
+}
+button.button_p {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: rgba(43, 111, 255, 1);
+    color: #ffffff;
+    border-radius: 16px;
+    font-size: 19px;
+    padding: 14px 0;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    cursor: pointer;
+}
+button.button_p:hover{
+    background-color: #2563EB;
+}
+
+.panel_tasks {
+    background: linear-gradient(332deg, rgba(197, 239, 255, 1), rgba(98, 173, 202, 1));
+    display: flex;
+    flex-grow: 7;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 24px;
+    min-height: auto; 
+    box-sizing: border-box;
+    gap: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); 
+    min-height: 485px;
+    padding: 0 20px;
+}
+.panel_tasks .tittle_buttons {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0;
+    color: #3B82F6; 
+    padding: 0 20px;
+}
+.tasks_cards {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    width: 100%;
+    margin: 0 0 20px 0;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 10px;
+}
+.task_card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+}
+.task_card p.name_p {
+    color: #3B82F6;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+.task_card p.inf_p {
+    color: #374151;
+    font-size: 17px;
+    margin: 0;
+}
+.task_card .button_edit,
+.task_card .button_delete {
+    border: none;
+    border-radius: 7px;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+
+.task_card .button_edit {
+    background-color: #3B82F6; 
+}
+
+.task_card .button_edit:hover {
+    background-color: #2563EB;
+}
+
+.task_card .button_delete {
+    background-color: #EF4444;
+}
+
+.task_card .button_delete:hover {
+    background-color: #DC2626;
+}
+
+
+@media (max-width: 780px) {
+    .divs{
+        flex-direction: column;
+    }
+}
+/* ================================== */
+/* === СТИЛІ МОДАЛЬНОГО ВІКНА === */
+/* ================================== */
+
+.add_task_background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999; 
+    display: none   ;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000b5;
+}
+.add_task_background.active{
+    display: flex;
+}
+.add_task {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    background-color: white;
+    border-radius: 16px;
+    padding: 30px;
+    min-width: 320px;
+    z-index: 1000; 
+}
+.p_input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.inf_card {
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+.inf_card.add_name{
+    color:rgba(43, 111, 255, 1);
+}
+.inout_add_card {
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+.inout_add_card:focus {
+    border-color: #3B82F6;
+}
+
+.button_save_card {
+    background-color: #3B82F6;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.button_save_card:hover {
+    background-color: #2563EB;
+}
+
+/* ================================== */
+/* === СТИЛІ ДЛЯ ВИПАДАЮЧОГО ФІЛЬТРУ === */
+/* ================================== */
+
+.filter-dropdown-container {
+    position: relative;
+    width: 80%;
+}
+
+.but_div.filter-button {
+    cursor: pointer;
+    justify-content: center;
+    user-select: none; 
+    width:100%;
+}
+
+.filter-button .arrow-down {
+    transition: transform 0.3s ease;
+}
+.filter-button .arrow-down.rotated {
+    transform: rotate(180deg);
+}
+
+.filter-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 105%;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.filter-dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f4f4f4;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #eeeeee;
+    margin: 5px 0;
+}
+
+.dropdown-item.danger {
+    color: #EF4444; 
+}
+.dropdown-item.danger:hover {
+    background-color: #fef2f2;
+}   
+
+.add_category_background {
+    position: fixed;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000b5;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+}
+.add_category_background.active{
+    display: flex;
+}
+.add_category {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+}
