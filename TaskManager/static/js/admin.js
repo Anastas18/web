@@ -1,13 +1,13 @@
 // --- ІМІТАЦІЯ БАЗИ ДАНИХ (для localStorage) ---
 
-// Приклад користувачів (Admin тут не потрібен, оскільки він залогінений)
+// Приклад користувачів (Включаючи адміністратора, який тут не зберігається, але його ID='admin')
 let USERS_DB = [
     { id: 1, name: 'User', email: 'user@tam.com', role: 'user' },
     { id: 2, name: 'Taras Shevchenko', email: 'taras@ua.com', role: 'user' },
     { id: 3, name: 'Lesya Ukrainka', email: 'lesya@ua.com', role: 'user' },
 ];
 
-// Приклад завдань
+// Приклад завдань (Зберігається під ключем 'admin_tasks')
 let TASKS_DB = [
     { id: 101, userId: 1, name: 'Купити продукти', deadline: '2025-11-15', priority: 'Високий', category: 'Особисте', completed: false },
     { id: 102, userId: 1, name: 'Написати звіт', deadline: '2025-11-12', priority: 'Середній', category: 'Робота', completed: true },
@@ -15,7 +15,7 @@ let TASKS_DB = [
     { id: 104, userId: 3, name: 'Відповісти на пошту', deadline: '2025-11-11', priority: 'Низький', category: 'Робота', completed: true },
 ];
 
-// Приклад категорій
+// Приклад категорій (Зберігається під ключем 'admin_categories')
 let CATEGORIES_DB = [
     { name: 'Особисте', count: 0 },
     { name: 'Робота', count: 0 },
@@ -24,9 +24,11 @@ let CATEGORIES_DB = [
 ];
 
 function initAdminDB() {
+    // Ініціалізація тільки користувачів (Tasks і Categories тепер керуються tasks.js)
     if (!localStorage.getItem('admin_users')) {
         localStorage.setItem('admin_users', JSON.stringify(USERS_DB));
     }
+    // Ініціалізація загальних сховищ, якщо вони відсутні
     if (!localStorage.getItem('admin_tasks')) {
         localStorage.setItem('admin_tasks', JSON.stringify(TASKS_DB));
     }
@@ -42,6 +44,16 @@ function getAdminDB(key) {
 function setAdminDB(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
 }
+
+function getAllUsersWithAdmin() {
+    const users = getAdminDB('admin_users');
+    const adminUser = JSON.parse(localStorage.getItem('currentUser'));
+    // Використовуємо email як ID для адміна, якщо ID відсутній
+    const adminId = adminUser.id || adminUser.email; 
+    const allUsers = [{ id: adminId, name: adminUser.name, email: adminUser.email, role: 'admin' }, ...users];
+    return allUsers;
+}
+
 
 // --- CONSTANTS ---
 const navMenu = document.querySelector('.under_p_service_u'); 
@@ -79,19 +91,19 @@ const saveCategoryBtn = document.getElementById('save-category-btn');
 const cancelCategoryBtn = document.getElementById('cancel-category-btn');
 const addCategoryBtn = document.getElementById('add-category-btn');
 
-let editingCategoryName = null; // Для відстеження категорії, яку редагуємо
+let editingCategoryName = null; 
 
-// --- НОВІ ЕЛЕМЕНТИ ДЛЯ ЗАВДАНЬ ---
+// --- ЕЛЕМЕНТИ ДЛЯ ЗАВДАНЬ ---
 const taskModalBackground = document.getElementById('task-modal-background');
 const taskInputName = document.getElementById('task-input-name');
 const taskInputDeadline = document.getElementById('task-input-deadline');
 const taskInputPriority = document.getElementById('task-input-priority');
 const taskInputCategory = document.getElementById('task-input-category');
 const taskInputCompleted = document.getElementById('task-input-completed');
-const saveTaskBtn = document.getElementById('save-task-btn');
+const saveTaskBtnModal = document.getElementById('save-task-btn'); 
 const cancelTaskBtn = document.getElementById('cancel-task-btn');
 
-let editingTaskId = null; // Для відстеження завдання, яке редагуємо
+let editingTaskId = null; 
 
 const PRIORITIES = ['Високий', 'Середній', 'Низький'];
 const COMPLETION_STATUSES = [
@@ -144,7 +156,6 @@ function setActivePanel(infoContainer, titleContainer, renderFunction) {
     titleContainer.style.display = 'flex';
     infoContainer.style.display = 'flex';
     if (renderFunction) {
-        // Очищаємо пошук при зміні панелі
         if(titleContainer === usersTitle && usersSearchInput) usersSearchInput.value = '';
         if(titleContainer === tasksTitle && tasksSearchInput) tasksSearchInput.value = '';
         if(titleContainer === categoryTitle && categorySearchInput) categorySearchInput.value = '';
@@ -191,12 +202,8 @@ function renderDashboard() {
 
 // --- 2. USERS LOGIC ---
 function renderUsers(keyword = '') {
-    const users = getAdminDB('admin_users');
+    const allUsers = getAllUsersWithAdmin();
     usersInfo.innerHTML = '';
-    
-    // Додаємо адміністратора до списку
-    const adminUser = JSON.parse(localStorage.getItem('currentUser'));
-    const allUsers = [{ id: 'admin', name: adminUser.name, email: adminUser.email, role: 'admin' }, ...users];
 
     let filteredUsers = allUsers;
     if (keyword) {
@@ -220,7 +227,6 @@ function renderUsers(keyword = '') {
         `;
     });
 
-    // Додаємо обробники для видалення
     usersInfo.querySelectorAll('.delete_btn_u').forEach(btn => {
         if (btn.dataset.id !== 'admin') {
             btn.addEventListener('click', deleteUser);
@@ -235,9 +241,7 @@ function deleteUser(event) {
     
     if (!confirm(`Ви впевнені, що хочете видалити користувача з ID: ${id}?`)) return;
 
-    // Видаляємо користувача
     users = users.filter(user => user.id !== id);
-    // Видаляємо всі завдання, пов'язані з цим користувачем
     tasks = tasks.filter(task => task.userId !== id);
 
     setAdminDB('admin_users', users);
@@ -248,13 +252,8 @@ function deleteUser(event) {
 // --- 3. TASKS LOGIC ---
 
 function populateTaskSelects(categories) {
-    // 1. Пріоритет
     taskInputPriority.innerHTML = PRIORITIES.map(p => `<option value="${p}">${p}</option>`).join('');
-    
-    // 2. Категорія
     taskInputCategory.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-    // 3. Статус
     taskInputCompleted.innerHTML = COMPLETION_STATUSES.map(s => `<option value="${s.value}">${s.text}</option>`).join('');
 }
 
@@ -276,8 +275,6 @@ function openTaskModal(taskId = null) {
             taskInputCategory.value = task.category || categories[0].name;
             taskInputCompleted.value = task.completed.toString();
         }
-    } else {
-        editingTaskId = null; // Не має відбутися, бо тут тільки редагування
     }
 }
 
@@ -317,35 +314,30 @@ function editAdminTask(event) {
 
 function renderAdminTasks(keyword = '') {
     const tasks = getAdminDB('admin_tasks');
-    const users = getAdminDB('admin_users');
+    const allUsers = getAllUsersWithAdmin();
     tasksInfo.innerHTML = '';
 
     let filteredTasks = tasks;
     if (keyword) {
         const lowerKeyword = keyword.toLowerCase();
-        // Пошук за ім'ям користувача, якому належить завдання
+        
         filteredTasks = tasks.filter(task => {
-            const user = users.find(u => u.id === task.userId);
-            const currentAdmin = JSON.parse(localStorage.getItem('currentUser'));
-            const isTaskByAdmin = task.userId === currentAdmin.id;
+            const user = allUsers.find(u => u.id === task.userId);
+            const userName = user ? user.name : 'Видалений користувач';
 
-            if (user && user.name.toLowerCase().includes(lowerKeyword)) {
-                return true;
-            } else if (isTaskByAdmin && currentAdmin.name.toLowerCase().includes(lowerKeyword)) {
-                return true;
-            }
-            return false;
+            // Пошук за назвою завдання або ім'ям користувача
+            return task.name.toLowerCase().includes(lowerKeyword) ||
+                   userName.toLowerCase().includes(lowerKeyword);
         });
     }
 
     filteredTasks.forEach(task => {
-        const user = users.find(u => u.id === task.userId) || JSON.parse(localStorage.getItem('currentUser'));
-        const userName = (user && (user.id === task.userId || (user.role === 'admin' && task.userId === 'admin'))) ? user.name : 'Видалений користувач';
+        const user = allUsers.find(u => u.id === task.userId) || { name: 'Видалений користувач', role: 'user' };
 
         tasksInfo.innerHTML += `
             <div class="task_card">
                 <p class="name_p">${task.name}</p>
-                <p class="inf_p">User: ${userName}</p>
+                <p class="inf_p">User: ${user.name} (${user.role})</p>
                 <p class="inf_p">Deadline: ${task.deadline || 'N/A'}</p>
                 <p class="inf_p">Priority: ${task.priority || 'N/A'}</p>
                 <p class="inf_p">Status: ${task.completed ? 'Виконано' : 'Не виконано'}</p>
@@ -402,7 +394,6 @@ function renderCategories(keyword = '') {
         `;
     });
     
-    // Додаємо обробники для редагування та видалення
     categoryInfo.querySelectorAll('.button_edit').forEach(btn => {
         btn.addEventListener('click', editCategory);
     });
@@ -412,7 +403,7 @@ function renderCategories(keyword = '') {
 }
 
 function openCategoryModal(name = null) {
-    categoryModalBackground.classList.add('active'); // Використовуємо .active для керування display:flex
+    categoryModalBackground.classList.add('active');
     if (name) {
         editingCategoryName = name;
         categoryModalTitle.textContent = 'Редагувати категорію';
@@ -449,13 +440,11 @@ function saveCategory() {
         // Редагування
         const oldName = editingCategoryName;
         
-        // Перевірка на унікальність
         if (oldName !== newName && categories.some(cat => cat.name === newName)) {
             alert('Категорія з такою назвою вже існує!');
             return;
         }
 
-        // 1. Оновлюємо ім'я у списку категорій
         categories = categories.map(cat => {
             if (cat.name === oldName) {
                 return { ...cat, name: newName };
@@ -463,7 +452,6 @@ function saveCategory() {
             return cat;
         });
 
-        // 2. Оновлюємо ім'я у всіх завданнях
         tasks = tasks.map(task => {
             if (task.category === oldName) {
                 return { ...task, category: newName };
@@ -481,7 +469,7 @@ function saveCategory() {
     }
 
     setAdminDB('admin_categories', categories);
-    setAdminDB('admin_tasks', tasks); // Зберігаємо оновлені завдання
+    setAdminDB('admin_tasks', tasks);
     closeCategoryModal();
     renderCategories(categorySearchInput.value); 
 }
@@ -497,9 +485,7 @@ function deleteCategory(event) {
     }
 
     if (confirm(`Ви впевнені, що хочете видалити категорію "${name}"? Завдання, які її використовують, будуть перенесені до "Інше".`)) {
-        // Видаляємо категорію
         categories = categories.filter(cat => cat.name !== name);
-        // Переносимо завдання до "Інше"
         tasks = tasks.map(task => {
             if (task.category === name) {
                 return { ...task, category: 'Інше' };
@@ -520,15 +506,12 @@ usersbtn.addEventListener('click', () => setActivePanel(usersInfo, usersTitle, r
 tasksbtn.addEventListener('click', () => setActivePanel(tasksInfo, tasksTitle, renderAdminTasks));
 categorybtn.addEventListener('click', () => setActivePanel(categoryInfo, categoryTitle, renderCategories));
 
-// Пошук користувачів
 if (usersSearchInput) {
     usersSearchInput.addEventListener('input', (e) => renderUsers(e.target.value));
 }
-// Пошук завдань
 if (tasksSearchInput) {
     tasksSearchInput.addEventListener('input', (e) => renderAdminTasks(e.target.value));
 }
-// Пошук категорій
 if (categorySearchInput) {
     categorySearchInput.addEventListener('input', (e) => renderCategories(e.target.value));
 }
@@ -552,8 +535,8 @@ if (categoryModalBackground) {
 }
 
 // Обробники для модального вікна завдання
-if (saveTaskBtn) {
-    saveTaskBtn.addEventListener('click', saveEditedTask);
+if (saveTaskBtnModal) {
+    saveTaskBtnModal.addEventListener('click', saveEditedTask);
 }
 if (cancelTaskBtn) {
     cancelTaskBtn.addEventListener('click', closeTaskModal);
@@ -570,5 +553,5 @@ if (taskModalBackground) {
 document.addEventListener('DOMContentLoaded', () => {
     initAdminDB(); 
     updateAuthUI();
-    dashbtn.click(); // Встановлюємо Дашборд як активний
+    dashbtn.click(); 
 });
