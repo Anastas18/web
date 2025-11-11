@@ -1,4 +1,4 @@
-// --- Логіка Перемикання Вкладки (залишена без змін) ---
+// --- Логіка Перемикання Вкладки (залишається без змін) ---
     const burgerMenu = document.getElementById('burger-menu');
     const navMenu = document.querySelector('.under_p_service_u'); 
 
@@ -28,14 +28,28 @@
         loginButton.classList.remove('active');
     });
 
-    // --- Логіка Авторизації (Імітація) ---
+    // --- ЛОГІКА АВТОРИЗАЦІЇ З СИНХРОНІЗАЦІЄЮ LOCALSTORAGE ---
     
-    // Імітація бази даних користувачів
-    let users = [
-        { name: 'Admin', email: 'admin@tam.com', password: 'admin', role: 'admin' },
-        { name: 'User', email: 'user@tam.com', password: 'user', role: 'user' }
+    // Імітація бази даних користувачів з фіксованим адміном
+    let USERS_DB_INIT = [
+        { id: 1, name: 'Admin', email: 'admin@tam.com', password: 'admin', role: 'admin' },
+        { id: 2, name: 'User', email: 'user@tam.com', password: 'user', role: 'user' }
     ];
-    
+
+    // Функція, що повертає список користувачів (без адміна)
+    function getUsersFromLocalStorage() {
+        const storedUsers = JSON.parse(localStorage.getItem('admin_users'));
+        // Видаляємо адміністратора з цього списку, оскільки він зберігається окремо
+        return storedUsers ? storedUsers.filter(u => u.role !== 'admin') : [];
+    }
+
+    function saveUserToLocalStorage(newUser) {
+        let storedUsers = getUsersFromLocalStorage();
+        storedUsers.push(newUser);
+        // Зберігаємо лише звичайних користувачів
+        localStorage.setItem('admin_users', JSON.stringify(storedUsers)); 
+    }
+
     // Отримання полів форми входу
     const loginEmailInput = loginFormDiv.querySelector('.inputs:nth-child(1) input');
     const loginPasswordInput = loginFormDiv.querySelector('.inputs:nth-child(2) input');
@@ -50,16 +64,22 @@
 
     // Логіка Входу
     loginConfirmButton.addEventListener('click', (event) => {
-        event.preventDefault(); // Запобігаємо стандартній відправці форми
+        event.preventDefault(); 
         
         const email = loginEmailInput.value;
         const password = loginPasswordInput.value;
+
+        // Збираємо всіх користувачів для перевірки (включаючи фіксованого адміна)
+        const allUsers = [...getUsersFromLocalStorage(), ...USERS_DB_INIT.filter(u => u.role === 'admin')];
         
-        const user = users.find(u => u.email === email && u.password === password);
+        const user = allUsers.find(u => u.email === email && u.password === password);
 
         if (user) {
-            // Успішний вхід. Зберігаємо користувача в локальне сховище.
+            // Використовуємо email як унікальний ID, якщо ID відсутній (для нових користувачів)
+            const userId = user.id || user.email;
+
             localStorage.setItem('currentUser', JSON.stringify({
+                id: userId, // Зберігаємо ID або Email як ID
                 name: user.name,
                 email: user.email,
                 role: user.role 
@@ -74,7 +94,7 @@
 
     // Логіка Реєстрації
     regConfirmButton.addEventListener('click', (event) => {
-        event.preventDefault(); // Запобігаємо стандартній відправці форми
+        event.preventDefault(); 
         
         const name = regNameInput.value;
         const email = regEmailInput.value;
@@ -91,17 +111,28 @@
             return;
         }
 
-        if (users.some(u => u.email === email)) {
+        // Перевіряємо унікальність серед усіх (локальних та фіксованих)
+        const allUsers = [...getUsersFromLocalStorage(), ...USERS_DB_INIT];
+        if (allUsers.some(u => u.email === email)) {
             alert('Користувач з таким email вже існує!');
             return;
         }
 
         // Імітація успішної реєстрації
-        const newUser = { name, email, password, role: 'user' }; // Новий користувач завжди 'user'
-        users.push(newUser); 
+        const newUser = { 
+            id: email, // Використовуємо email як ID
+            name, 
+            email, 
+            password, // У реальному житті тут буде хеш
+            role: 'user' 
+        }; 
+        
+        // Зберігаємо нового користувача в localStorage
+        saveUserToLocalStorage(newUser);
         
         // Автоматичний вхід після реєстрації
         localStorage.setItem('currentUser', JSON.stringify({
+            id: newUser.id,
             name: newUser.name,
             email: newUser.email,
             role: newUser.role 
@@ -109,4 +140,13 @@
         
         alert(`Реєстрація успішна! Вітаємо, ${newUser.name}.`);
         window.location.href = 'index.html'; 
+    });
+
+    // Ініціалізуємо ADMIN_USERS у localStorage, якщо він ще порожній
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!localStorage.getItem('admin_users')) {
+            // Зберігаємо лише фіксованих звичайних користувачів (адмін додасться динамічно)
+            const initialUsers = USERS_DB_INIT.filter(u => u.role === 'user');
+            localStorage.setItem('admin_users', JSON.stringify(initialUsers));
+        }
     });

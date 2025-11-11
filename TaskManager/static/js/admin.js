@@ -1,40 +1,19 @@
 // --- ІМІТАЦІЯ БАЗИ ДАНИХ (для localStorage) ---
 
-// Приклад користувачів (Включаючи адміністратора, який тут не зберігається, але його ID='admin')
-let USERS_DB = [
-    { id: 1, name: 'User', email: 'user@tam.com', role: 'user' },
-    { id: 2, name: 'Taras Shevchenko', email: 'taras@ua.com', role: 'user' },
-    { id: 3, name: 'Lesya Ukrainka', email: 'lesya@ua.com', role: 'user' },
-];
-
-// Приклад завдань (Зберігається під ключем 'admin_tasks')
-let TASKS_DB = [
-    { id: 101, userId: 1, name: 'Купити продукти', deadline: '2025-11-15', priority: 'Високий', category: 'Особисте', completed: false },
-    { id: 102, userId: 1, name: 'Написати звіт', deadline: '2025-11-12', priority: 'Середній', category: 'Робота', completed: true },
-    { id: 103, userId: 2, name: 'Вивчити JS', deadline: '2025-12-01', priority: 'Високий', category: 'Навчання', completed: false },
-    { id: 104, userId: 3, name: 'Відповісти на пошту', deadline: '2025-11-11', priority: 'Низький', category: 'Робота', completed: true },
-];
-
-// Приклад категорій (Зберігається під ключем 'admin_categories')
-let CATEGORIES_DB = [
-    { name: 'Особисте', count: 0 },
-    { name: 'Робота', count: 0 },
-    { name: 'Навчання', count: 0 },
-    { name: 'Інше', count: 0 },
-];
+// Видаляємо статичні масиви USERS_DB, TASKS_DB, CATEGORIES_DB
+// Тепер дані читаються виключно з localStorage
 
 function initAdminDB() {
-    // Ініціалізація тільки користувачів (Tasks і Categories тепер керуються tasks.js)
-    if (!localStorage.getItem('admin_users')) {
-        localStorage.setItem('admin_users', JSON.stringify(USERS_DB));
-    }
+    // ВАЖЛИВО: Перевіряємо та ініціалізуємо лише загальні сховища, якщо вони відсутні
+    
     // Ініціалізація загальних сховищ, якщо вони відсутні
     if (!localStorage.getItem('admin_tasks')) {
-        localStorage.setItem('admin_tasks', JSON.stringify(TASKS_DB));
+        localStorage.setItem('admin_tasks', JSON.stringify([]));
     }
     if (!localStorage.getItem('admin_categories')) {
-        localStorage.setItem('admin_categories', JSON.stringify(CATEGORIES_DB));
+        localStorage.setItem('admin_categories', JSON.stringify([{ name: 'Особисте' }, { name: 'Робота' }, { name: 'Навчання' }, { name: 'Інше' }]));
     }
+    // Користувачі ініціалізуються у login.js
 }
 
 function getAdminDB(key) {
@@ -48,8 +27,11 @@ function setAdminDB(key, data) {
 function getAllUsersWithAdmin() {
     const users = getAdminDB('admin_users');
     const adminUser = JSON.parse(localStorage.getItem('currentUser'));
-    // Використовуємо email як ID для адміна, якщо ID відсутній
+    
+    // Використовуємо email як ID, якщо ID відсутній (як зроблено в login.js)
     const adminId = adminUser.id || adminUser.email; 
+    
+    // Додаємо адміністратора до списку
     const allUsers = [{ id: adminId, name: adminUser.name, email: adminUser.email, role: 'admin' }, ...users];
     return allUsers;
 }
@@ -235,14 +217,16 @@ function renderUsers(keyword = '') {
 }
 
 function deleteUser(event) {
-    const id = Number(event.target.dataset.id);
+    const userIdToDelete = event.target.dataset.id;
     let users = getAdminDB('admin_users');
     let tasks = getAdminDB('admin_tasks');
     
-    if (!confirm(`Ви впевнені, що хочете видалити користувача з ID: ${id}?`)) return;
+    if (!confirm(`Ви впевнені, що хочете видалити користувача з ID: ${userIdToDelete}?`)) return;
 
-    users = users.filter(user => user.id !== id);
-    tasks = tasks.filter(task => task.userId !== id);
+    // Видаляємо користувача
+    users = users.filter(user => user.id !== userIdToDelete);
+    // Видаляємо всі завдання, пов'язані з цим користувачем
+    tasks = tasks.filter(task => task.userId !== userIdToDelete);
 
     setAdminDB('admin_users', users);
     setAdminDB('admin_tasks', tasks);
@@ -332,12 +316,15 @@ function renderAdminTasks(keyword = '') {
     }
 
     filteredTasks.forEach(task => {
-        const user = allUsers.find(u => u.id === task.userId) || { name: 'Видалений користувач', role: 'user' };
+        const user = allUsers.find(u => u.id === task.userId);
+        const userName = user ? user.name : 'Видалений користувач';
+        const userRole = user ? user.role : 'user';
+
 
         tasksInfo.innerHTML += `
             <div class="task_card">
                 <p class="name_p">${task.name}</p>
-                <p class="inf_p">User: ${user.name} (${user.role})</p>
+                <p class="inf_p">User: ${userName} (${userRole})</p>
                 <p class="inf_p">Deadline: ${task.deadline || 'N/A'}</p>
                 <p class="inf_p">Priority: ${task.priority || 'N/A'}</p>
                 <p class="inf_p">Status: ${task.completed ? 'Виконано' : 'Не виконано'}</p>
