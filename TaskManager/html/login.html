@@ -26,31 +26,7 @@
             <span class="burger-bar"></span>
             <span class="burger-bar"></span>
         </button>
-        <div class="under_p_service_g">
-            <div class="panel_service guest">
-                <a class="p_service main" href="index.html">Головна</a>
-                <a class="p_service tasks" href="tasks.html">Завдання</a>
-                <a class="p_service calendar" href="calendar.html">Календар</a>
-                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
-                <a class="p_service login" href="loginsignup.html">Вхід/Реєстрація</a>
-            </div>
-        </div>
-        <div class="under_p_service_u" id="nav-menu">
-            <div class="panel_service user">
-                <a class="p_service main" href="index.html">Головна</a>
-                <a class="p_service tasks" href="tasks.html">Завдання</a>
-                <a class="p_service calendar" href="calendar.html">Календар</a>
-                <a class="p_service about_app" href="aboutapp.html">Про застосунок</a>
-                <div class="user_p_b">
-                    <div class="user_panel button_hover">
-                        <img src="../static/images/user.svg" alt="" class="iconUser">
-                        <a class="p_service user_name_p" id="name_u_footer">Name</a>
-                    </div>
-                    <button class="button_logout button_hover">Вийти</button>
-                </div>
-
-            </div>
-        </div>
+        
     </header>
     <main class="index">
         <div class="register_login">
@@ -147,35 +123,6 @@
             </div>
         </div>
     </footer>
-    <script>
-        const burgerMenu = document.getElementById('burger-menu');
-        const navMenu = document.querySelector('.under_p_service_u'); 
-
-        burgerMenu.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-
-        const loginButton = document.querySelector('.login_button');
-        const registerButton = document.querySelector('.register_button');
-
-        const loginForm = document.getElementById('login-form'); 
-        const registerForm = document.getElementById('register-form'); 
-
-        loginButton.addEventListener('click', () => {
-            loginForm.style.display = 'flex';
-            registerForm.style.display = 'none';
-
-            loginButton.classList.add('active');
-            registerButton.classList.remove('active');
-        });
-
-        registerButton.addEventListener('click', () => {
-            loginForm.style.display = 'none';
-            registerForm.style.display = 'flex';
-
-            registerButton.classList.add('active');
-            loginButton.classList.remove('active');
-        });
-    </script>
+<script src="../static/js/login.js"></script>
 </body>
 </html>

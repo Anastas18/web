@@ -46,12 +46,12 @@ img.iconTAM {
 }
 .under_p_service_g {
     flex-grow: 5;
-    display: none;
+    display: flex; 
     justify-content: flex-start;
 }
 .under_p_service_u {
     flex-grow: 5;
-    display: flex;
+    display: none; 
     justify-content: flex-start;
 }
 .panel_service.guest, .panel_service.user {
@@ -420,9 +420,20 @@ a.footer_text:hover {
         background-color: #f9fafb;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-
+    .under_p_service_g {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #f9fafb;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .under_p_service_g.active {
+        display: flex;
+    }
     .under_p_service_u.active {
-        display: block;
+        display: flex;
     }
     .panel_service.user {
         flex-direction: column;
@@ -430,12 +441,25 @@ a.footer_text:hover {
         padding: 20px 0;
         width: 100%;
     }
-
+    .panel_service.guest { 
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+        width: 100%;
+        gap: 0;
+    }
+    .panel_service.guest a.p_service {
+        color: #374151; /* Темний колір для посилань гостя */
+        padding: 10px 0; 
+    }
     .panel_service.user a.p_service {
         color: #374151;
         padding: 10px 0; 
     }
     .panel_service.user a.p_service:hover {
+        color: #3B82F6;
+    }
+    .panel_service.guest a.p_service:hover {
         color: #3B82F6;
     }
     #name_u_footer{

@@ -45,10 +45,14 @@
                     <div class="user_panel button_hover">
                         <img src="../static/images/user.svg" alt="" class="iconUser">
                         <a class="p_service user_name_p" id="name_u_footer">Name</a>
+                        <div class="admin_div">
+                        <a href="admin.html" class="admin_a">Admin_panel</a>
+                </div>
                     </div>
                     <button class="button_logout button_hover">Вийти</button>
+                    
                 </div>
-
+                
             </div>
         </div>
     </header>
@@ -70,15 +74,21 @@
                 </div>
                 <div class="p_input">
                     <p class="inf_card">Deadline</p>
-                    <input type="text" placeholder="Deadline" class="inout_add_card">
+                    <input type="date" placeholder="Deadline" class="inout_add_card" id="task-deadline-input">
                 </div>
                 <div class="p_input">
                     <p class="inf_card">Priority</p>
-                    <input type="text" placeholder="Priority" class="inout_add_card">
+                    <select class="inout_add_card" id="task-priority-select">
+                        <option value="Низька">Низька</option>
+                        <option value="Середня">Середня</option>
+                        <option value="Висока">Висока</option>
+                    </select>
                 </div>
                 <div class="p_input">
-                    <p class="inf_card">Сategory</p>
-                    <input type="text" placeholder="Сategory" class="inout_add_card">
+                    <p class="inf_card">Category</p>
+                    <select class="inout_add_card" id="task-category-select">
+
+                    </select>
                 </div>
                 <button class="button_save_card">
                     Зберегти
@@ -209,85 +219,6 @@
             </div>
         </div>
     </footer>
-    <script>
-
-        // burger-menu
-        const burgerMenu = document.getElementById('burger-menu');
-        const navMenu = document.querySelector('.under_p_service_u'); 
-
-        burgerMenu.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-
-        // add task
-        const add_task_back = document.querySelector('.add_task_background');
-        const add_task = document.querySelector('.add_task');
-        const add_task_btn = document.querySelector('.button_add');
-
-        add_task_btn.addEventListener('click', () => {
-            add_task_back.classList.toggle('active');
-        })
-        window.addEventListener('click', (event) => {
-            if (add_task_btn.contains(event.target)) {
-                return; 
-            }
-            if(!add_task.contains(event.target)){
-                if(add_task_back.classList.contains('active')){
-                    add_task_back.classList.remove('active');
-                }
-            }
-        });
-
-        // add category
-        const add_category_background = document.querySelector('.add_category_background');
-        const add_category = document.querySelector('.add_category');
-        const button_category = document.querySelector('.button_category');
-
-        button_category.addEventListener('click', () => {
-            add_category_background.classList.toggle('active');
-        })
-        window.addEventListener('click', (event) => {
-            if (button_category.contains(event.target)) {
-                return; 
-            }
-            if(!add_category.contains(event.target)){
-                if(add_category_background.classList.contains('active')){
-                    add_category_background.classList.remove('active');
-                }
-            }
-        });
-
-        // filter
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            const filterBtn = document.getElementById('filter-toggle-btn');
-            const filterMenu = document.getElementById('filter-menu');
-            
-            if (filterBtn && filterMenu) {
-                const filterArrow = filterBtn.querySelector('.arrow-down');
-
-                filterBtn.addEventListener('click', () => {
-                    filterMenu.classList.toggle('show');
-                    filterArrow.classList.toggle('rotated');
-                });
-                window.addEventListener('click', (event) => {
-                    if (!filterBtn.contains(event.target) && !filterMenu.contains(event.target)) {
-                        if (filterMenu.classList.contains('show')) {
-                            filterMenu.classList.remove('show');
-                            filterArrow.classList.remove('rotated');
-                        }
-                    }
-                });
-                filterMenu.addEventListener('click', (event) => {
-                    if (event.target.classList.contains('dropdown-item')) {
-
-                        // тут буду додавати фільтрацію
-                        filterMenu.classList.remove('show');
-                        filterArrow.classList.remove('rotated');
-                    }
-                });
-            }
-        });
-    </script>
+<script src="../static/js/tasks.js"></script>
 </body>
 </html>
