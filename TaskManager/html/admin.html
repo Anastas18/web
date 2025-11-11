@@ -57,6 +57,53 @@
         </div>
     </header>
     <main class="index">
+        <div class="add_category_background" id="category-modal-background">
+            <div class="add_category">
+                <p class="name_card edit_p" id="category-modal-title">Додати нову категорію</p>
+                <div class="p_input">
+                    <p class="inf_card">Назва категорії</p>
+                    <input type="text" placeholder="Назва" class="inout_add_card" id="category-input-name">
+                </div>
+                <div style="display: flex; gap: 10px; width: 100%; justify-content: space-evenly; flex-direction: column;">
+                    <button class="button_save_card" id="save-category-btn" style="flex-grow: 1;">Зберегти</button>
+                    <button class="button_cancel_card" id="cancel-category-btn" style="flex-grow: 1;">Скасувати</button>
+                </div>
+            </div>
+        </div>
+        <div class="add_category_background" id="task-modal-background">
+            <div class="add_category">
+                <p class="name_card edit_p" id="task-modal-title">Редагувати завдання</p>
+                
+                <div class="p_input">
+                    <p class="inf_card">Назва</p>
+                    <input type="text" class="inout_add_card" id="task-input-name">
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Дедлайн</p>
+                    <input type="date" class="inout_add_card" id="task-input-deadline">
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Пріоритет</p>
+                    <select class="inout_add_card" id="task-input-priority"></select>
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Категорія</p>
+                    <select class="inout_add_card" id="task-input-category"></select>
+                </div>
+                <div class="p_input">
+                    <p class="inf_card">Статус</p>
+                    <select class="inout_add_card" id="task-input-completed">
+                        <option value="false">Не виконано</option>
+                        <option value="true">Виконано</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px; width: 100%; justify-content: space-evenly; flex-direction: column;">
+                    <button class="button_save_card" id="save-task-btn" style="flex-grow: 1;">Зберегти зміни</button>
+                    <button class="button_cancel_card" id="cancel-task-btn" style="flex-grow: 1;">Скасувати</button>
+                </div>
+            </div>
+        </div>
         <div class="title_div"><p class="p_title">Admin Panel</p></div>
         <div class="navi_panel">
             <div class="navigation">
@@ -101,6 +148,7 @@
                             <img src="../static/images/loupe.svg" alt="" class="icon_loupe">
                         </button>
                     </div>
+                    <button class="button_add_admin" id="add-category-btn">Додати категорію</button>
                 </div>
                 <div class="inf_panel dash">
                     <div class="inf_div">
