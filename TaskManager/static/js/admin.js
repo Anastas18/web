@@ -1,11 +1,6 @@
 // --- ІМІТАЦІЯ БАЗИ ДАНИХ (для localStorage) ---
 
-// Видаляємо статичні масиви USERS_DB, TASKS_DB, CATEGORIES_DB
-// Тепер дані читаються виключно з localStorage
-
 function initAdminDB() {
-    // ВАЖЛИВО: Перевіряємо та ініціалізуємо лише загальні сховища, якщо вони відсутні
-    
     // Ініціалізація загальних сховищ, якщо вони відсутні
     if (!localStorage.getItem('admin_tasks')) {
         localStorage.setItem('admin_tasks', JSON.stringify([]));
@@ -13,7 +8,6 @@ function initAdminDB() {
     if (!localStorage.getItem('admin_categories')) {
         localStorage.setItem('admin_categories', JSON.stringify([{ name: 'Особисте' }, { name: 'Робота' }, { name: 'Навчання' }, { name: 'Інше' }]));
     }
-    // Користувачі ініціалізуються у login.js
 }
 
 function getAdminDB(key) {
@@ -28,16 +22,16 @@ function getAllUsersWithAdmin() {
     const users = getAdminDB('admin_users');
     const adminUser = JSON.parse(localStorage.getItem('currentUser'));
     
-    // Використовуємо email як ID, якщо ID відсутній (як зроблено в login.js)
     const adminId = adminUser.id || adminUser.email; 
     
-    // Додаємо адміністратора до списку
     const allUsers = [{ id: adminId, name: adminUser.name, email: adminUser.email, role: 'admin' }, ...users];
     return allUsers;
 }
 
 
 // --- CONSTANTS ---
+// Елементи Header (скопійовано)
+const burgerMenu = document.getElementById('burger-menu');
 const navMenu = document.querySelector('.under_p_service_u'); 
 const guestMenu = document.querySelector('.under_p_service_g');
 const userPanel = document.querySelector('.user_panel');
@@ -46,6 +40,7 @@ const userNameDisplay = document.getElementById('name_u_footer');
 const adminLink = document.querySelector('.admin_a');
 const logoutButton = document.querySelector('.button_logout');
 
+// Елементи Панелі (існують в admin.js)
 const dashbtn = document.getElementById('dashbtn');
 const usersbtn = document.getElementById('usersbtn');
 const tasksbtn = document.getElementById('tasksbtn');
@@ -65,7 +60,7 @@ const usersSearchInput = document.querySelector('.tittle_panel.users .input_pane
 const tasksSearchInput = document.querySelector('.tittle_panel.tasks .input_panel');
 const categorySearchInput = document.querySelector('.tittle_panel.category .input_panel');
 
-// --- ЕЛЕМЕНТИ ДЛЯ КАТЕГОРІЙ ---
+// --- ЕЛЕМЕНТИ ДЛЯ МОДАЛЬНИХ ВІКОН ---
 const categoryModalBackground = document.getElementById('category-modal-background');
 const categoryModalTitle = document.getElementById('category-modal-title');
 const categoryInputName = document.getElementById('category-input-name');
@@ -75,7 +70,6 @@ const addCategoryBtn = document.getElementById('add-category-btn');
 
 let editingCategoryName = null; 
 
-// --- ЕЛЕМЕНТИ ДЛЯ ЗАВДАНЬ ---
 const taskModalBackground = document.getElementById('task-modal-background');
 const taskInputName = document.getElementById('task-input-name');
 const taskInputDeadline = document.getElementById('task-input-deadline');
@@ -93,23 +87,57 @@ const COMPLETION_STATUSES = [
     { value: 'true', text: 'Виконано' }
 ];
 
-// --- HEADER LOGIC ---
+// --- HEADER LOGIC (ОБ'ЄДНАНО З АВТОРИЗАЦІЄЮ ТА ЗАХИСТОМ) ---
 function updateAuthUI() {
     const user = JSON.parse(localStorage.getItem('currentUser'));
     const isLoggedIn = !!user;
 
-    if (isLoggedIn && user.role === 'admin') {
-        guestMenu.style.display = 'none';
-        navMenu.style.display = 'flex'; 
-        userNameDisplay.textContent = user.name;
-        adminLink.style.display = 'block'; 
-    } else {
+    // 1. Скидаємо мобільні класи
+    navMenu.classList.remove('active');
+    guestMenu.classList.remove('active');
+    guestMenu.style.display = 'none';
+    // 2. ЗАХИСТ СТОРІНКИ
+    if (!isLoggedIn || user.role !== 'admin') {
         alert('У вас немає прав доступу до панелі адміністратора. Перенаправлення на головну.');
         window.location.href = 'index.html'; 
         return;
     }
+
+    // 3. ЛОГІКА HEADER
+    if (user.role === 'admin') {
+        // КОРИСТУВАЧ (АДМІН)
+        navMenu.classList.add('visible-desktop');
+        guestMenu.classList.remove('visible-desktop');
+        userNameDisplay.textContent = user.name;
+        adminLink.style.display = 'block'; 
+    } else {
+        // ТЕОРЕТИЧНО, ЦЕ НЕ ПОВИННО СТАНУТИСЯ ЧЕРЕЗ ПЕРШУ ПЕРЕВІРКУ, 
+        // АЛЕ НА ВИПАДОК РЕДИРЕКТУ З ІНШОЇ СТОРІНКИ:
+        guestMenu.classList.add('visible-desktop');
+        navMenu.classList.remove('visible-desktop');
+    }
 }
 
+// БУРГЕР-МЕНЮ (СКОПІЙОВАНО З script.js)
+const burgerMenuEl = document.getElementById('burger-menu'); // Використовуємо іншу назву змінної, щоб уникнути конфлікту з константою
+if (burgerMenuEl) {
+    burgerMenuEl.addEventListener('click', () => {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const isLoggedIn = !!user;
+
+        if (isLoggedIn) {
+            // Якщо користувач: перемикаємо меню користувача
+            guestMenu.classList.remove('active'); 
+            navMenu.classList.toggle('active');
+        } else {
+            // Якщо гість: перемикаємо гостьове меню
+            navMenu.classList.remove('active'); 
+            guestMenu.classList.toggle('active');
+        }
+    });
+}
+
+// Випадаюче меню адміна (залишається без змін)
 if (userPanel && adminPanel) {
     userPanel.addEventListener('click', () => { adminPanel.classList.toggle('active'); });
     window.addEventListener('click', (event) => {
@@ -127,7 +155,7 @@ if (logoutButton) {
 }
 
 
-// --- PANEL NAVIGATION LOGIC ---
+// --- PANEL NAVIGATION LOGIC (Не змінена) ---
 function hideAllPanels() {
     [dashTitle, usersTitle, tasksTitle, categoryTitle].forEach(el => el.style.display = 'none');
     [dashInfo, usersInfo, tasksInfo, categoryInfo].forEach(el => el.style.display = 'none');
@@ -146,7 +174,7 @@ function setActivePanel(infoContainer, titleContainer, renderFunction) {
     }
 }
 
-// --- 1. DASHBOARD LOGIC ---
+// --- 1. DASHBOARD LOGIC (Не змінена) ---
 function renderDashboard() {
     const users = getAdminDB('admin_users');
     const tasks = getAdminDB('admin_tasks');
@@ -182,7 +210,7 @@ function renderDashboard() {
     `;
 }
 
-// --- 2. USERS LOGIC ---
+// --- 2. USERS LOGIC (Не змінена) ---
 function renderUsers(keyword = '') {
     const allUsers = getAllUsersWithAdmin();
     usersInfo.innerHTML = '';
@@ -233,7 +261,7 @@ function deleteUser(event) {
     renderUsers(usersSearchInput.value);
 }
 
-// --- 3. TASKS LOGIC ---
+// --- 3. TASKS LOGIC (Не змінена) ---
 
 function populateTaskSelects(categories) {
     taskInputPriority.innerHTML = PRIORITIES.map(p => `<option value="${p}">${p}</option>`).join('');
@@ -309,7 +337,6 @@ function renderAdminTasks(keyword = '') {
             const user = allUsers.find(u => u.id === task.userId);
             const userName = user ? user.name : 'Видалений користувач';
 
-            // Пошук за назвою завдання або ім'ям користувача
             return task.name.toLowerCase().includes(lowerKeyword) ||
                    userName.toLowerCase().includes(lowerKeyword);
         });
@@ -354,7 +381,7 @@ function deleteAdminTask(event) {
     renderAdminTasks(tasksSearchInput.value);
 }
 
-// --- 4. CATEGORIES LOGIC ---
+// --- 4. CATEGORIES LOGIC (Не змінена) ---
 function renderCategories(keyword = '') {
     const categories = getAdminDB('admin_categories');
     const tasks = getAdminDB('admin_tasks');

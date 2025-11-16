@@ -16,7 +16,7 @@
         window.location.href = 'tasks.html';
     }
     function redirectToLogin() {
-        window.location.href = 'loginsignup.html';
+        window.location.href = 'login.html';
     }
 
     // Керування станом авторизації
@@ -30,8 +30,9 @@
 
         if (isLoggedIn) {
             // КОРИСТУВАЧ (Керування ДЕСКТОПОМ через style.display)
+            navMenu.classList.add('visible-desktop');
+            guestMenu.classList.remove('visible-desktop');
             guestMenu.style.display = 'none';
-            navMenu.style.display = 'flex';
             userNameDisplay.textContent = user.name;
             
             // Керування адмін-доступом
@@ -50,9 +51,9 @@
 
         } else {
             // ГІСТЬ (Керування ДЕСКТОПОМ через style.display)
-            guestMenu.style.display = 'flex';
+            guestMenu.classList.add('visible-desktop');
+            navMenu.classList.remove('visible-desktop');
             navMenu.style.display = 'none';
-            
             // Керування кнопкою "Розпочати"
             if (buttonGetStart) {
                 buttonGetStart.textContent = 'Розпочати';

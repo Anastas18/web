@@ -51,7 +51,7 @@ img.iconTAM {
 }
 .under_p_service_u {
     flex-grow: 5;
-    display: none; 
+    display: flex; 
     justify-content: flex-start;
 }
 .panel_service.guest, .panel_service.user {
@@ -434,6 +434,7 @@ a.footer_text:hover {
     }
     .under_p_service_u.active {
         display: flex;
+        z-index: 200;
     }
     .panel_service.user {
         flex-direction: column;

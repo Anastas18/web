@@ -29,6 +29,7 @@ const adminPanel = document.querySelector('.admin_div');
 const userNameDisplay = document.getElementById('name_u_footer');
 const adminLink = document.querySelector('.admin_a');
 const logoutButton = document.querySelector('.button_logout');
+const burgerMenu = document.getElementById('burger-menu');
 
 function redirectToLogin() {
     window.location.href = 'loginsignup.html';
@@ -42,8 +43,9 @@ function updateAuthUI() {
     guestMenu.classList.remove('active');
 
     if (isLoggedIn) {
+        navMenu.classList.add('visible-desktop');
+        guestMenu.classList.remove('visible-desktop');
         guestMenu.style.display = 'none';
-        navMenu.style.display = 'flex'; 
         userNameDisplay.textContent = user.name;
 
         if (user.role === 'admin') {
@@ -58,6 +60,23 @@ function updateAuthUI() {
         redirectToLogin(); 
     }
 }
+
+if (burgerMenu) {
+        burgerMenu.addEventListener('click', () => {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            const isLoggedIn = !!user;
+
+            if (isLoggedIn) {
+                // Якщо користувач: перемикаємо меню користувача
+                guestMenu.classList.remove('active'); 
+                navMenu.classList.toggle('active');
+            } else {
+                // Якщо гість: перемикаємо гостьове меню
+                navMenu.classList.remove('active'); 
+                guestMenu.classList.toggle('active');
+            }
+        });
+    }
 
 // Випадаюче меню адміна та Вийти (залишається без змін)
 if (userPanel && adminPanel) {
@@ -185,7 +204,6 @@ function renderTasks(filter = 'all', keyword = '') {
             <p class="inf_p">Priority: ${task.priority || 'N/A'}</p>
             <p class="inf_p">Category: ${task.category || 'N/A'}</p>
             <button class="${completeClass} button_edit" data-id="${task.id}">${completeText}</button>
-            <button class="button_edit" data-id="${task.id}">Редагувати</button>
             <button class="button_delete" data-id="${task.id}">Видалити</button>
         `;
         taskContainer.appendChild(card);
