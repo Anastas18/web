@@ -21,25 +21,32 @@
 
     // Керування станом авторизації
     function updateAuthUI() {
+        // Зчитуємо дані користувача з localStorage
         const user = JSON.parse(localStorage.getItem('currentUser'));
-        const isLoggedIn = !!user;
+        // Перевіряємо токен. Якщо токен є, вважаємо користувача залогіненим.
+        const authToken = localStorage.getItem('authToken');
+        const isLoggedIn = !!user && !!authToken;
 
         // 1. Скидаємо мобільні класи при зміні стану
-        navMenu.classList.remove('active');
-        guestMenu.classList.remove('active');
+        if (navMenu) navMenu.classList.remove('active');
+        if (guestMenu) guestMenu.classList.remove('active');
 
         if (isLoggedIn) {
             // КОРИСТУВАЧ (Керування ДЕСКТОПОМ через style.display)
-            navMenu.classList.add('visible-desktop');
-            guestMenu.classList.remove('visible-desktop');
-            guestMenu.style.display = 'none';
-            userNameDisplay.textContent = user.name;
+            if (navMenu) navMenu.classList.add('visible-desktop');
+            if (guestMenu) {
+                guestMenu.classList.remove('visible-desktop');
+                guestMenu.style.display = 'none';
+            }
+            if (userNameDisplay) userNameDisplay.textContent = user.name;
             
             // Керування адмін-доступом
-            if (user.role === 'admin') {
-                adminLink.style.display = 'block';
-            } else {
-                adminLink.style.display = 'none';
+            if (adminLink) {
+                if (user.role === 'admin') {
+                    adminLink.style.display = 'block';
+                } else {
+                    adminLink.style.display = 'none';
+                }
             }
             
             // Керування кнопкою "Розпочати"
@@ -51,9 +58,11 @@
 
         } else {
             // ГІСТЬ (Керування ДЕСКТОПОМ через style.display)
-            guestMenu.classList.add('visible-desktop');
-            navMenu.classList.remove('visible-desktop');
-            navMenu.style.display = 'none';
+            if (guestMenu) guestMenu.classList.add('visible-desktop');
+            if (navMenu) {
+                navMenu.classList.remove('visible-desktop');
+                navMenu.style.display = 'none';
+            }
             // Керування кнопкою "Розпочати"
             if (buttonGetStart) {
                 buttonGetStart.textContent = 'Розпочати';
@@ -71,12 +80,12 @@
 
             if (isLoggedIn) {
                 // Якщо користувач: перемикаємо меню користувача
-                guestMenu.classList.remove('active'); 
-                navMenu.classList.toggle('active');
+                if (guestMenu) guestMenu.classList.remove('active'); 
+                if (navMenu) navMenu.classList.toggle('active');
             } else {
                 // Якщо гість: перемикаємо гостьове меню
-                navMenu.classList.remove('active'); 
-                guestMenu.classList.toggle('active');
+                if (navMenu) navMenu.classList.remove('active'); 
+                if (guestMenu) guestMenu.classList.toggle('active');
             }
         });
     }
@@ -97,10 +106,15 @@
         });
     }
 
-    // Кнопка "Вийти" (залишається без змін)
+    // Кнопка "Вийти" (Оновлена логіка)
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
+            // Видаляємо дані та токен
             localStorage.removeItem('currentUser');
+            localStorage.removeItem('authToken'); 
+            // Викликаємо API /logout (не обов'язково, але можна для повноти)
+            fetch('http://localhost:3000/api/auth/logout', { method: 'POST' });
+
             updateAuthUI();
             window.location.href = 'index.html'; 
         });

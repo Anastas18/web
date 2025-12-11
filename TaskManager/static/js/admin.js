@@ -1,36 +1,54 @@
-// --- ІМІТАЦІЯ БАЗИ ДАНИХ (для localStorage) ---
+// admin.js - ОНОВЛЕНИЙ ДЛЯ РОБОТИ З БЕКЕНДОМ
 
-function initAdminDB() {
-    // Ініціалізація загальних сховищ, якщо вони відсутні
-    if (!localStorage.getItem('admin_tasks')) {
-        localStorage.setItem('admin_tasks', JSON.stringify([]));
-    }
-    if (!localStorage.getItem('admin_categories')) {
-        localStorage.setItem('admin_categories', JSON.stringify([{ name: 'Особисте' }, { name: 'Робота' }, { name: 'Навчання' }, { name: 'Інше' }]));
-    }
+// --- ІМІТАЦІЯ БАЗИ ДАНИХ (ВИДАЛЕНО, ТЕПЕР ВИКОРИСТОВУЄМО API) ---
+const API_BASE_URL = 'http://localhost:3000/api/admin';
+
+// --- AUTH UTILS ---
+const getAuthToken = () => {
+    return localStorage.getItem('authToken');
 }
+const redirectToIndex = () => {
+    window.location.href = 'index.html';
+};
+const redirectToLogin = () => {
+    window.location.href = 'login.html';
+};
 
-function getAdminDB(key) {
-    return JSON.parse(localStorage.getItem(key)) || [];
-}
-
-function setAdminDB(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-}
-
-function getAllUsersWithAdmin() {
-    const users = getAdminDB('admin_users');
-    const adminUser = JSON.parse(localStorage.getItem('currentUser'));
+// Допоміжна функція для надсилання запитів з токеном
+async function adminApiFetch(endpoint, options = {}) {
+    const token = getAuthToken();
     
-    const adminId = adminUser.id || adminUser.email; 
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers 
+    };
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers
+    });
     
-    const allUsers = [{ id: adminId, name: adminUser.name, email: adminUser.email, role: 'admin' }, ...users];
-    return allUsers;
+    if (response.status === 401 || response.status === 403) {
+        // Якщо токен недійсний/права відсутні, редирект
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        alert('Сесія закінчилася або відсутні права доступу.');
+        redirectToLogin();
+        throw new Error('Unauthorized or Forbidden');
+    }
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'API request failed');
+    }
+
+    return response.json().catch(() => ({})); 
 }
 
 
 // --- CONSTANTS ---
-// Елементи Header (скопійовано)
+// Елементи Header 
 const burgerMenu = document.getElementById('burger-menu');
 const navMenu = document.querySelector('.under_p_service_u'); 
 const guestMenu = document.querySelector('.under_p_service_g');
@@ -40,7 +58,7 @@ const userNameDisplay = document.getElementById('name_u_footer');
 const adminLink = document.querySelector('.admin_a');
 const logoutButton = document.querySelector('.button_logout');
 
-// Елементи Панелі (існують в admin.js)
+// Елементи Панелі 
 const dashbtn = document.getElementById('dashbtn');
 const usersbtn = document.getElementById('usersbtn');
 const tasksbtn = document.getElementById('tasksbtn');
@@ -68,7 +86,7 @@ const saveCategoryBtn = document.getElementById('save-category-btn');
 const cancelCategoryBtn = document.getElementById('cancel-category-btn');
 const addCategoryBtn = document.getElementById('add-category-btn');
 
-let editingCategoryName = null; 
+let editingCategoryId = null; // ID категорії, яку редагуємо
 
 const taskModalBackground = document.getElementById('task-modal-background');
 const taskInputName = document.getElementById('task-input-name');
@@ -83,79 +101,44 @@ let editingTaskId = null;
 
 const PRIORITIES = ['Високий', 'Середній', 'Низький'];
 const COMPLETION_STATUSES = [
-    { value: 'false', text: 'Не виконано' },
-    { value: 'true', text: 'Виконано' }
+    { value: 'Виконане', text: 'Виконано' },
+    { value: 'Активне', text: 'Не виконано' }
 ];
 
-// --- HEADER LOGIC (ОБ'ЄДНАНО З АВТОРИЗАЦІЄЮ ТА ЗАХИСТОМ) ---
+// -----------------------------------------------------------------
+// --- AUTH PROTECTION AND HEADER LOGIC ---
+// -----------------------------------------------------------------
 function updateAuthUI() {
     const user = JSON.parse(localStorage.getItem('currentUser'));
-    const isLoggedIn = !!user;
+    const token = getAuthToken();
+    const isLoggedIn = !!user && !!token;
 
-    // 1. Скидаємо мобільні класи
-    navMenu.classList.remove('active');
-    guestMenu.classList.remove('active');
-    guestMenu.style.display = 'none';
-    // 2. ЗАХИСТ СТОРІНКИ
+    // 1. ЗАХИСТ СТОРІНКИ
     if (!isLoggedIn || user.role !== 'admin') {
         alert('У вас немає прав доступу до панелі адміністратора. Перенаправлення на головну.');
-        window.location.href = 'index.html'; 
+        redirectToIndex(); 
         return;
     }
 
-    // 3. ЛОГІКА HEADER
-    if (user.role === 'admin') {
-        // КОРИСТУВАЧ (АДМІН)
-        navMenu.classList.add('visible-desktop');
-        guestMenu.classList.remove('visible-desktop');
-        userNameDisplay.textContent = user.name;
-        adminLink.style.display = 'block'; 
-    } else {
-        // ТЕОРЕТИЧНО, ЦЕ НЕ ПОВИННО СТАНУТИСЯ ЧЕРЕЗ ПЕРШУ ПЕРЕВІРКУ, 
-        // АЛЕ НА ВИПАДОК РЕДИРЕКТУ З ІНШОЇ СТОРІНКИ:
-        guestMenu.classList.add('visible-desktop');
-        navMenu.classList.remove('visible-desktop');
-    }
+    // 2. ЛОГІКА HEADER
+    if (navMenu) navMenu.classList.add('visible-desktop');
+    if (guestMenu) guestMenu.style.display = 'none';
+    if (userNameDisplay) userNameDisplay.textContent = user.name;
+    if (adminLink) adminLink.style.display = 'block'; 
 }
 
-// БУРГЕР-МЕНЮ (СКОПІЙОВАНО З script.js)
-const burgerMenuEl = document.getElementById('burger-menu'); // Використовуємо іншу назву змінної, щоб уникнути конфлікту з константою
-if (burgerMenuEl) {
-    burgerMenuEl.addEventListener('click', () => {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        const isLoggedIn = !!user;
-
-        if (isLoggedIn) {
-            // Якщо користувач: перемикаємо меню користувача
-            guestMenu.classList.remove('active'); 
-            navMenu.classList.toggle('active');
-        } else {
-            // Якщо гість: перемикаємо гостьове меню
-            navMenu.classList.remove('active'); 
-            guestMenu.classList.toggle('active');
-        }
-    });
-}
-
-// Випадаюче меню адміна (залишається без змін)
-if (userPanel && adminPanel) {
-    userPanel.addEventListener('click', () => { adminPanel.classList.toggle('active'); });
-    window.addEventListener('click', (event) => {
-        if (!userPanel.contains(event.target) && !adminPanel.contains(event.target)) {
-            adminPanel.classList.remove('active');
-        }
-    });
-}
-
+// ... БУРГЕР-МЕНЮ та Вийти (logoutButton) залишаються як у script.js ...
 if (logoutButton) {
     logoutButton.addEventListener('click', () => {
         localStorage.removeItem('currentUser');
-        window.location.href = 'index.html'; 
+        localStorage.removeItem('authToken'); 
+        fetch('http://localhost:3000/api/auth/logout', { method: 'POST' });
+        redirectToIndex(); 
     });
 }
-
-
-// --- PANEL NAVIGATION LOGIC (Не змінена) ---
+// -----------------------------------------------------------------
+// --- PANEL NAVIGATION LOGIC ---
+// -----------------------------------------------------------------
 function hideAllPanels() {
     [dashTitle, usersTitle, tasksTitle, categoryTitle].forEach(el => el.style.display = 'none');
     [dashInfo, usersInfo, tasksInfo, categoryInfo].forEach(el => el.style.display = 'none');
@@ -166,6 +149,7 @@ function setActivePanel(infoContainer, titleContainer, renderFunction) {
     titleContainer.style.display = 'flex';
     infoContainer.style.display = 'flex';
     if (renderFunction) {
+        // Очищення інпутів при зміні панелі
         if(titleContainer === usersTitle && usersSearchInput) usersSearchInput.value = '';
         if(titleContainer === tasksTitle && tasksSearchInput) tasksSearchInput.value = '';
         if(titleContainer === categoryTitle && categorySearchInput) categorySearchInput.value = '';
@@ -174,119 +158,161 @@ function setActivePanel(infoContainer, titleContainer, renderFunction) {
     }
 }
 
-// --- 1. DASHBOARD LOGIC (Не змінена) ---
-function renderDashboard() {
-    const users = getAdminDB('admin_users');
-    const tasks = getAdminDB('admin_tasks');
-    const categories = getAdminDB('admin_categories');
+// -----------------------------------------------------------------
+// --- 1. DASHBOARD LOGIC (Оновлено для API) ---
+// -----------------------------------------------------------------
+async function renderDashboard() {
+    try {
+        const [users, tasks, categories] = await Promise.all([
+            adminApiFetch('/users'),
+            adminApiFetch('/tasks/all'),
+            adminApiFetch('/categories/all')
+        ]);
 
-    const totalUsers = users.length + 1; // +1 для самого адміністратора
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.completed).length;
-    const uncompletedTasks = totalTasks - completedTasks;
-    const totalCategories = categories.length;
+        const totalUsers = users.length;
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(t => t.Status === 'Виконане').length;
+        const uncompletedTasks = totalTasks - completedTasks;
+        const totalCategories = categories.length;
 
-    dashInfo.innerHTML = `
-        <div class="inf_div">
-            <p class="name_inf no_m">Користувачів: </p>
-            <p class="inf_p no_m">${totalUsers}</p>
-        </div>
-        <div class="inf_div">   
-            <p class="name_inf no_m">Завдань (заг.): </p>
-            <p class="inf_p no_m">${totalTasks}</p>
-        </div>
-        <div class="inf_div">
-            <p class="name_inf no_m">Виконаних зав.: </p>
-            <p class="inf_p no_m">${completedTasks}</p>
-        </div>
-        <div class="inf_div">
-            <p class="name_inf no_m">Невиконаних зав.: </p>
-            <p class="inf_p no_m">${uncompletedTasks}</p>
-        </div>
-        <div class="inf_div">
-            <p class="name_inf no_m">Категорій: </p>
-            <p class="inf_p no_m">${totalCategories}</p>
-        </div>
-    `;
-}
-
-// --- 2. USERS LOGIC (Не змінена) ---
-function renderUsers(keyword = '') {
-    const allUsers = getAllUsersWithAdmin();
-    usersInfo.innerHTML = '';
-
-    let filteredUsers = allUsers;
-    if (keyword) {
-        const lowerKeyword = keyword.toLowerCase();
-        filteredUsers = allUsers.filter(user => 
-            user.email.toLowerCase().includes(lowerKeyword) || 
-            String(user.id).includes(lowerKeyword)
-        );
-    }
-    
-    filteredUsers.forEach(user => {
-        usersInfo.innerHTML += `
-            <div class="user_div">
-                <p class="inf_u">ID: ${user.id}</p>
-                <p class="inf_u">Name: ${user.name}</p>
-                <p class="inf_u">Email: ${user.email}</p>
-                <button class="delete_btn_u" data-id="${user.id}" ${user.role === 'admin' ? 'disabled' : ''}>
-                    ${user.role === 'admin' ? 'Адмін' : 'Видалити'}
-                </button>
+        dashInfo.innerHTML = `
+            <div class="inf_div">
+                <p class="name_inf no_m">Користувачів: </p>
+                <p class="inf_p no_m">${totalUsers}</p>
+            </div>
+            <div class="inf_div">   
+                <p class="name_inf no_m">Завдань (заг.): </p>
+                <p class="inf_p no_m">${totalTasks}</p>
+            </div>
+            <div class="inf_div">
+                <p class="name_inf no_m">Виконаних зав.: </p>
+                <p class="inf_p no_m">${completedTasks}</p>
+            </div>
+            <div class="inf_div">
+                <p class="name_inf no_m">Невиконаних зав.: </p>
+                <p class="inf_p no_m">${uncompletedTasks}</p>
+            </div>
+            <div class="inf_div">
+                <p class="name_inf no_m">Категорій: </p>
+                <p class="inf_p no_m">${totalCategories}</p>
             </div>
         `;
-    });
 
-    usersInfo.querySelectorAll('.delete_btn_u').forEach(btn => {
-        if (btn.dataset.id !== 'admin') {
-            btn.addEventListener('click', deleteUser);
+    } catch (error) {
+        console.error('Error rendering dashboard:', error);
+        dashInfo.innerHTML = `<p class="error_msg">Помилка завантаження даних дашборда: ${error.message}</p>`;
+    }
+}
+
+// -----------------------------------------------------------------
+// --- 2. USERS LOGIC (Оновлено для API) ---
+// -----------------------------------------------------------------
+async function renderUsers(keyword = '') {
+    try {
+        const allUsers = await adminApiFetch('/users');
+        usersInfo.innerHTML = '';
+        const currentUserId = getCurrentUserId();
+
+        let filteredUsers = allUsers;
+        if (keyword) {
+            const lowerKeyword = keyword.toLowerCase();
+            filteredUsers = allUsers.filter(user => 
+                user.Email.toLowerCase().includes(lowerKeyword) || 
+                String(user.id).includes(lowerKeyword) ||
+                user.name.toLowerCase().includes(lowerKeyword)
+            );
         }
-    });
+        
+        filteredUsers.forEach(user => {
+            const isAdmin = user.Role === 'admin';
+            const canDelete = !isAdmin && user.id !== currentUserId;
+            
+            usersInfo.innerHTML += `
+                <div class="user_div">
+                    <p class="inf_u">ID: ${user.id}</p>
+                    <p class="inf_u">Name: ${user.name}</p>
+                    <p class="inf_u">Email: ${user.Email}</p>
+                    <button class="delete_btn_u" data-id="${user.id}" ${!canDelete ? 'disabled' : ''} style="background-color: ${isAdmin ? '#FF9800' : 'red'}; color: white;">
+                        ${isAdmin ? 'Адмін' : 'Видалити'}
+                    </button>
+                </div>
+            `;
+        });
+
+        usersInfo.querySelectorAll('.delete_btn_u').forEach(btn => {
+            if (!btn.disabled) {
+                btn.addEventListener('click', deleteUser);
+            }
+        });
+
+    } catch (error) {
+        console.error('Error rendering users:', error);
+        usersInfo.innerHTML = `<p class="error_msg">Помилка завантаження користувачів: ${error.message}</p>`;
+    }
 }
 
-function deleteUser(event) {
+async function deleteUser(event) {
     const userIdToDelete = event.target.dataset.id;
-    let users = getAdminDB('admin_users');
-    let tasks = getAdminDB('admin_tasks');
     
-    if (!confirm(`Ви впевнені, що хочете видалити користувача з ID: ${userIdToDelete}?`)) return;
+    if (!confirm(`Ви впевнені, що хочете видалити користувача з ID: ${userIdToDelete}? Це видалить усі його завдання.`)) return;
 
-    // Видаляємо користувача
-    users = users.filter(user => user.id !== userIdToDelete);
-    // Видаляємо всі завдання, пов'язані з цим користувачем
-    tasks = tasks.filter(task => task.userId !== userIdToDelete);
+    try {
+        await adminApiFetch(`/users/${userIdToDelete}`, { method: 'DELETE' });
+        alert('Користувача та його завдання видалено.');
+        renderUsers(usersSearchInput.value); // Оновлюємо список
 
-    setAdminDB('admin_users', users);
-    setAdminDB('admin_tasks', tasks);
-    renderUsers(usersSearchInput.value);
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        alert(error.message || 'Помилка при видаленні користувача.');
+    }
 }
 
-// --- 3. TASKS LOGIC (Не змінена) ---
+// -----------------------------------------------------------------
+// --- 3. TASKS LOGIC (Оновлено для API) ---
+// -----------------------------------------------------------------
 
-function populateTaskSelects(categories) {
+let allAdminCategories = []; // Зберігаємо категорії для модального вікна
+
+async function populateTaskSelects() {
     taskInputPriority.innerHTML = PRIORITIES.map(p => `<option value="${p}">${p}</option>`).join('');
-    taskInputCategory.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
     taskInputCompleted.innerHTML = COMPLETION_STATUSES.map(s => `<option value="${s.value}">${s.text}</option>`).join('');
+    
+    try {
+        const categories = await adminApiFetch('/categories/all');
+        allAdminCategories = categories;
+        taskInputCategory.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    } catch (error) {
+        console.error('Error fetching categories for task modal:', error);
+    }
 }
 
-function openTaskModal(taskId = null) {
-    const tasks = getAdminDB('admin_tasks');
-    const categories = getAdminDB('admin_categories');
-
-    populateTaskSelects(categories);
+async function openTaskModal(taskId) {
+    await populateTaskSelects(); // Завантажуємо категорії
     
     taskModalBackground.classList.add('active'); 
+    editingTaskId = taskId;
 
-    if (taskId) {
-        editingTaskId = taskId;
-        const task = tasks.find(t => t.id === taskId);
+    try {
+        // Отримуємо всі завдання, потім знаходимо потрібне
+        const allTasks = await adminApiFetch('/tasks/all');
+        const task = allTasks.find(t => String(t.id) === String(taskId));
+
         if (task) {
-            taskInputName.value = task.name;
-            taskInputDeadline.value = task.deadline || '';
-            taskInputPriority.value = task.priority || PRIORITIES[0];
-            taskInputCategory.value = task.category || categories[0].name;
-            taskInputCompleted.value = task.completed.toString();
+            taskInputName.value = task.Title;
+            taskInputDeadline.value = task.DueDate ? new Date(task.DueDate).toISOString().substring(0, 10) : '';
+            taskInputPriority.value = task.Priority;
+            taskInputCompleted.value = task.Status; 
+            
+            // Знаходимо CategoryID за назвою
+            const category = allAdminCategories.find(c => c.name === task.Category);
+            if (category) {
+                taskInputCategory.value = category.id;
+            }
         }
+    } catch (error) {
+        console.error('Error loading task for modal:', error);
+        alert('Помилка завантаження даних завдання.');
+        closeTaskModal();
     }
 }
 
@@ -295,135 +321,161 @@ function closeTaskModal() {
     editingTaskId = null;
 }
 
-function saveEditedTask() {
+async function saveEditedTask() {
     if (!editingTaskId) return;
 
-    let tasks = getAdminDB('admin_tasks');
-    const taskIndex = tasks.findIndex(t => t.id === editingTaskId);
+    const category = allAdminCategories.find(c => String(c.id) === taskInputCategory.value);
 
-    if (taskIndex !== -1) {
-        if (!taskInputName.value.trim()) {
-            alert("Назва завдання не може бути порожньою!");
-            return;
-        }
+    const updatedData = {
+        title: taskInputName.value.trim(),
+        due_date: taskInputDeadline.value,
+        priority: taskInputPriority.value,
+        status_name: taskInputCompleted.value,
+        category_id: parseInt(taskInputCategory.value),
+    };
+    
+    if (!updatedData.title) {
+        alert("Назва завдання не може бути порожньою!");
+        return;
+    }
 
-        tasks[taskIndex].name = taskInputName.value.trim();
-        tasks[taskIndex].deadline = taskInputDeadline.value;
-        tasks[taskIndex].priority = taskInputPriority.value;
-        tasks[taskIndex].category = taskInputCategory.value;
-        tasks[taskIndex].completed = taskInputCompleted.value === 'true';
-
-        setAdminDB('admin_tasks', tasks);
+    try {
+        await adminApiFetch(`/tasks/${editingTaskId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updatedData)
+        });
+        
+        alert('Завдання успішно оновлено.');
         closeTaskModal();
-        renderAdminTasks(tasksSearchInput.value);
+        renderAdminTasks(tasksSearchInput.value); // Оновлюємо список
+    } catch (error) {
+        console.error('Error saving task:', error);
+        alert(error.message || 'Помилка при збереженні завдання.');
     }
 }
 
 function editAdminTask(event) {
-    const id = Number(event.target.dataset.id);
+    const id = event.target.dataset.id;
     openTaskModal(id);
 }
 
-function renderAdminTasks(keyword = '') {
-    const tasks = getAdminDB('admin_tasks');
-    const allUsers = getAllUsersWithAdmin();
-    tasksInfo.innerHTML = '';
-
-    let filteredTasks = tasks;
-    if (keyword) {
-        const lowerKeyword = keyword.toLowerCase();
+async function renderAdminTasks(keyword = '') {
+    try {
+        const tasks = await adminApiFetch('/tasks/all');
+        tasksInfo.innerHTML = '';
         
-        filteredTasks = tasks.filter(task => {
-            const user = allUsers.find(u => u.id === task.userId);
-            const userName = user ? user.name : 'Видалений користувач';
+        let filteredTasks = tasks;
+        if (keyword) {
+            const lowerKeyword = keyword.toLowerCase();
+            
+            filteredTasks = tasks.filter(task => {
+                return task.Title.toLowerCase().includes(lowerKeyword) ||
+                       task.UserName.toLowerCase().includes(lowerKeyword);
+            });
+        }
 
-            return task.name.toLowerCase().includes(lowerKeyword) ||
-                   userName.toLowerCase().includes(lowerKeyword);
+        filteredTasks.forEach(task => {
+            const isCompleted = task.Status === 'Виконане';
+
+            tasksInfo.innerHTML += `
+                <div class="task_card">
+                    <p class="name_p">${task.Title}</p>
+                    <p class="inf_p">User: ${task.UserName} (ID: ${task.userId})</p>
+                    <p class="inf_p">Deadline: ${task.DueDate || 'N/A'}</p>
+                    <p class="inf_p">Priority: ${task.Priority}</p>
+                    <p class="inf_p">Status: ${task.Status}</p>
+                    <p class="inf_p">Category: ${task.Category}</p>
+                    <button class="button_edit" data-id="${task.id}">Редагувати</button>
+                    <button class="button_delete" data-id="${task.id}">Видалити</button>
+                </div>
+            `;
         });
+        
+        tasksInfo.querySelectorAll('.button_edit').forEach(btn => {
+            btn.addEventListener('click', editAdminTask);
+        });
+        tasksInfo.querySelectorAll('.button_delete').forEach(btn => {
+            btn.addEventListener('click', deleteAdminTask);
+        });
+
+    } catch (error) {
+        console.error('Error rendering admin tasks:', error);
+        tasksInfo.innerHTML = `<p class="error_msg">Помилка завантаження завдань: ${error.message}</p>`;
     }
-
-    filteredTasks.forEach(task => {
-        const user = allUsers.find(u => u.id === task.userId);
-        const userName = user ? user.name : 'Видалений користувач';
-        const userRole = user ? user.role : 'user';
-
-
-        tasksInfo.innerHTML += `
-            <div class="task_card">
-                <p class="name_p">${task.name}</p>
-                <p class="inf_p">User: ${userName} (${userRole})</p>
-                <p class="inf_p">Deadline: ${task.deadline || 'N/A'}</p>
-                <p class="inf_p">Priority: ${task.priority || 'N/A'}</p>
-                <p class="inf_p">Status: ${task.completed ? 'Виконано' : 'Не виконано'}</p>
-                <p class="inf_p">Category: ${task.category || 'N/A'}</p>
-                <button class="button_edit" data-id="${task.id}">Редагувати</button>
-                <button class="button_delete" data-id="${task.id}">Видалити</button>
-            </div>
-        `;
-    });
-    
-    tasksInfo.querySelectorAll('.button_edit').forEach(btn => {
-        btn.addEventListener('click', editAdminTask);
-    });
-    tasksInfo.querySelectorAll('.button_delete').forEach(btn => {
-        btn.addEventListener('click', deleteAdminTask);
-    });
 }
 
-function deleteAdminTask(event) {
-    const id = Number(event.target.dataset.id);
-    let tasks = getAdminDB('admin_tasks');
+async function deleteAdminTask(event) {
+    const id = event.target.dataset.id;
 
     if (!confirm(`Ви впевнені, що хочете видалити завдання з ID: ${id}?`)) return;
 
-    tasks = tasks.filter(task => task.id !== id);
-    setAdminDB('admin_tasks', tasks);
-    renderAdminTasks(tasksSearchInput.value);
-}
-
-// --- 4. CATEGORIES LOGIC (Не змінена) ---
-function renderCategories(keyword = '') {
-    const categories = getAdminDB('admin_categories');
-    const tasks = getAdminDB('admin_tasks');
-    categoryInfo.innerHTML = '';
-
-    let filteredCategories = categories;
-    if (keyword) {
-        const lowerKeyword = keyword.toLowerCase();
-        filteredCategories = categories.filter(cat => 
-            cat.name.toLowerCase().includes(lowerKeyword)
-        );
+    try {
+        await adminApiFetch(`/tasks/${id}`, { method: 'DELETE' });
+        alert('Завдання видалено адміністратором.');
+        renderAdminTasks(tasksSearchInput.value);
+    } catch (error) {
+        console.error('Error deleting admin task:', error);
+        alert(error.message || 'Помилка при видаленні завдання.');
     }
-
-    filteredCategories.forEach(cat => {
-        const taskCount = tasks.filter(t => t.category === cat.name).length;
-
-        categoryInfo.innerHTML += `
-            <div class="task_card">
-                <p class="name_p">${cat.name}</p>
-                <p class="inf_p">Завдань: ${taskCount}</p>
-                <button class="button_edit" data-name="${cat.name}">Редагувати</button>
-                <button class="button_delete" data-name="${cat.name}">Видалити</button>
-            </div>
-        `;
-    });
-    
-    categoryInfo.querySelectorAll('.button_edit').forEach(btn => {
-        btn.addEventListener('click', editCategory);
-    });
-    categoryInfo.querySelectorAll('.button_delete').forEach(btn => {
-        btn.addEventListener('click', deleteCategory);
-    });
 }
 
-function openCategoryModal(name = null) {
+// -----------------------------------------------------------------
+// --- 4. CATEGORIES LOGIC (Оновлено для API) ---
+// -----------------------------------------------------------------
+
+async function renderCategories(keyword = '') {
+    try {
+        const categories = await adminApiFetch('/categories/all');
+        categoryInfo.innerHTML = '';
+        
+        let filteredCategories = categories;
+        if (keyword) {
+            const lowerKeyword = keyword.toLowerCase();
+            filteredCategories = categories.filter(cat => 
+                cat.name.toLowerCase().includes(lowerKeyword)
+            );
+        }
+
+        filteredCategories.forEach(cat => {
+            const isGeneral = cat.name === 'Інше';
+            const canDelete = !isGeneral;
+
+            categoryInfo.innerHTML += `
+                <div class="task_card">
+                    <p class="name_p">${cat.name}</p>
+                    <p class="inf_p">Завдань: ${cat.taskCount}</p>
+                    <button class="button_edit" data-id="${cat.id}" data-name="${cat.name}">Редагувати</button>
+                    <button class="button_delete" data-id="${cat.id}" ${!canDelete ? 'disabled' : ''}>
+                        Видалити
+                    </button>
+                </div>
+            `;
+        });
+        
+        categoryInfo.querySelectorAll('.button_edit').forEach(btn => {
+            btn.addEventListener('click', editCategory);
+        });
+        categoryInfo.querySelectorAll('.button_delete').forEach(btn => {
+            if (!btn.disabled) {
+                btn.addEventListener('click', deleteCategory);
+            }
+        });
+
+    } catch (error) {
+        console.error('Error rendering categories:', error);
+        categoryInfo.innerHTML = `<p class="error_msg">Помилка завантаження категорій: ${error.message}</p>`;
+    }
+}
+
+function openCategoryModal(categoryId = null, name = null) {
     categoryModalBackground.classList.add('active');
-    if (name) {
-        editingCategoryName = name;
+    
+    if (categoryId && name) {
+        editingCategoryId = categoryId;
         categoryModalTitle.textContent = 'Редагувати категорію';
         categoryInputName.value = name;
     } else {
-        editingCategoryName = null;
+        editingCategoryId = null;
         categoryModalTitle.textContent = 'Додати нову категорію';
         categoryInputName.value = '';
     }
@@ -431,141 +483,92 @@ function openCategoryModal(name = null) {
 
 function closeCategoryModal() {
     categoryModalBackground.classList.remove('active');
-    editingCategoryName = null;
+    editingCategoryId = null;
     categoryInputName.value = '';
 }
 
 function editCategory(event) {
+    const id = event.target.dataset.id;
     const name = event.target.dataset.name;
-    openCategoryModal(name);
+    openCategoryModal(id, name);
 }
 
-function saveCategory() {
-    const newName = categoryInputName.value.trim();
-    if (!newName) {
+async function saveCategory() {
+    const name = categoryInputName.value.trim();
+    if (!name) {
         alert('Назва категорії не може бути порожньою!');
         return;
     }
 
-    let categories = getAdminDB('admin_categories');
-    let tasks = getAdminDB('admin_tasks');
-
-    if (editingCategoryName) {
-        // Редагування
-        const oldName = editingCategoryName;
-        
-        if (oldName !== newName && categories.some(cat => cat.name === newName)) {
-            alert('Категорія з такою назвою вже існує!');
-            return;
-        }
-
-        categories = categories.map(cat => {
-            if (cat.name === oldName) {
-                return { ...cat, name: newName };
-            }
-            return cat;
+    const method = editingCategoryId ? 'PUT' : 'POST';
+    const endpoint = editingCategoryId ? `/categories/${editingCategoryId}` : '/categories';
+    
+    try {
+        await adminApiFetch(endpoint, {
+            method: method,
+            body: JSON.stringify({ name })
         });
 
-        tasks = tasks.map(task => {
-            if (task.category === oldName) {
-                return { ...task, category: newName };
-            }
-            return task;
-        });
-
-    } else {
-        // Додавання
-        if (categories.some(cat => cat.name === newName)) {
-            alert('Категорія з такою назвою вже існує!');
-            return;
-        }
-        categories.push({ name: newName, count: 0 });
+        alert(`Категорію успішно ${editingCategoryId ? 'оновлено' : 'додано'}.`);
+        closeCategoryModal();
+        renderCategories(categorySearchInput.value); 
+    } catch (error) {
+        console.error('Error saving category:', error);
+        alert(error.message || 'Помилка при збереженні категорії.');
     }
-
-    setAdminDB('admin_categories', categories);
-    setAdminDB('admin_tasks', tasks);
-    closeCategoryModal();
-    renderCategories(categorySearchInput.value); 
 }
 
-function deleteCategory(event) {
-    const name = event.target.dataset.name;
-    let categories = getAdminDB('admin_categories');
-    let tasks = getAdminDB('admin_tasks');
+async function deleteCategory(event) {
+    const categoryId = event.target.dataset.id;
     
-    if (name === 'Інше') {
-        alert('Категорію "Інше" не можна видалити.');
-        return;
-    }
-
-    if (confirm(`Ви впевнені, що хочете видалити категорію "${name}"? Завдання, які її використовують, будуть перенесені до "Інше".`)) {
-        categories = categories.filter(cat => cat.name !== name);
-        tasks = tasks.map(task => {
-            if (task.category === name) {
-                return { ...task, category: 'Інше' };
-            }
-            return task;
-        });
-
-        setAdminDB('admin_categories', categories);
-        setAdminDB('admin_tasks', tasks);
-        renderCategories(categorySearchInput.value);
+    if (confirm(`Ви впевнені, що хочете видалити цю категорію? Пов'язані завдання будуть перенесені до "Інше".`)) {
+        try {
+            await adminApiFetch(`/categories/${categoryId}`, { method: 'DELETE' });
+            alert('Категорія успішно видалена.');
+            renderCategories(categorySearchInput.value);
+        } catch (error) {
+            console.error('Error deleting category:', error);
+            alert(error.message || 'Помилка при видаленні категорії.');
+        }
     }
 }
 
 
 // --- EVENT LISTENERS ---
-dashbtn.addEventListener('click', () => setActivePanel(dashInfo, dashTitle, renderDashboard));
-usersbtn.addEventListener('click', () => setActivePanel(usersInfo, usersTitle, renderUsers));
-tasksbtn.addEventListener('click', () => setActivePanel(tasksInfo, tasksTitle, renderAdminTasks));
-categorybtn.addEventListener('click', () => setActivePanel(categoryInfo, categoryTitle, renderCategories));
+if (dashbtn) dashbtn.addEventListener('click', () => setActivePanel(dashInfo, dashTitle, renderDashboard));
+if (usersbtn) usersbtn.addEventListener('click', () => setActivePanel(usersInfo, usersTitle, renderUsers));
+if (tasksbtn) tasksbtn.addEventListener('click', () => setActivePanel(tasksInfo, tasksTitle, renderAdminTasks));
+if (categorybtn) categorybtn.addEventListener('click', () => setActivePanel(categoryInfo, categoryTitle, renderCategories));
 
-if (usersSearchInput) {
-    usersSearchInput.addEventListener('input', (e) => renderUsers(e.target.value));
-}
-if (tasksSearchInput) {
-    tasksSearchInput.addEventListener('input', (e) => renderAdminTasks(e.target.value));
-}
-if (categorySearchInput) {
-    categorySearchInput.addEventListener('input', (e) => renderCategories(e.target.value));
-}
+if (usersSearchInput) usersSearchInput.addEventListener('input', (e) => renderUsers(e.target.value));
+if (tasksSearchInput) tasksSearchInput.addEventListener('input', (e) => renderAdminTasks(e.target.value));
+if (categorySearchInput) categorySearchInput.addEventListener('input', (e) => renderCategories(e.target.value));
 
 // Обробники для модального вікна категорії
-if (addCategoryBtn) {
-    addCategoryBtn.addEventListener('click', () => openCategoryModal());
-}
-if (saveCategoryBtn) {
-    saveCategoryBtn.addEventListener('click', saveCategory);
-}
-if (cancelCategoryBtn) {
-    cancelCategoryBtn.addEventListener('click', closeCategoryModal);
-}
+if (addCategoryBtn) addCategoryBtn.addEventListener('click', () => openCategoryModal());
+if (saveCategoryBtn) saveCategoryBtn.addEventListener('click', saveCategory);
+if (cancelCategoryBtn) cancelCategoryBtn.addEventListener('click', closeCategoryModal);
 if (categoryModalBackground) {
     categoryModalBackground.addEventListener('click', (event) => {
-        if (event.target === categoryModalBackground) {
-            closeCategoryModal();
-        }
+        if (event.target === categoryModalBackground) closeCategoryModal();
     });
 }
 
 // Обробники для модального вікна завдання
-if (saveTaskBtnModal) {
-    saveTaskBtnModal.addEventListener('click', saveEditedTask);
-}
-if (cancelTaskBtn) {
-    cancelTaskBtn.addEventListener('click', closeTaskModal);
-}
+if (saveTaskBtnModal) saveTaskBtnModal.addEventListener('click', saveEditedTask);
+if (cancelTaskBtn) cancelTaskBtn.addEventListener('click', closeTaskModal);
 if (taskModalBackground) {
     taskModalBackground.addEventListener('click', (event) => {
-        if (event.target === taskModalBackground) {
-            closeTaskModal();
-        }
+        if (event.target === taskModalBackground) closeTaskModal();
     });
 }
 
+
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    initAdminDB(); 
     updateAuthUI();
-    dashbtn.click(); 
+    // Запускаємо Dashboard після успішної перевірки прав
+    if (getAuthToken() && JSON.parse(localStorage.getItem('currentUser'))?.role === 'admin') {
+        if (dashbtn) dashbtn.click(); 
+    }
 });

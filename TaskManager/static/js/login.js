@@ -2,9 +2,11 @@
     const burgerMenu = document.getElementById('burger-menu');
     const navMenu = document.querySelector('.under_p_service_u'); 
 
-    burgerMenu.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-    });
+    if (burgerMenu) {
+        burgerMenu.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    }
 
     const loginButton = document.querySelector('.login_button');
     const registerButton = document.querySelector('.register_button');
@@ -12,141 +14,133 @@
     const loginFormDiv = document.getElementById('login-form'); 
     const registerFormDiv = document.getElementById('register-form'); 
 
-    loginButton.addEventListener('click', () => {
-        loginFormDiv.style.display = 'flex';
-        registerFormDiv.style.display = 'none';
+    if (loginButton && registerButton && loginFormDiv && registerFormDiv) {
+        loginButton.addEventListener('click', () => {
+            loginFormDiv.style.display = 'flex';
+            registerFormDiv.style.display = 'none';
 
-        loginButton.classList.add('active');
-        registerButton.classList.remove('active');
-    });
+            loginButton.classList.add('active');
+            registerButton.classList.remove('active');
+        });
 
-    registerButton.addEventListener('click', () => {
-        loginFormDiv.style.display = 'none';
-        registerFormDiv.style.display = 'flex';
+        registerButton.addEventListener('click', () => {
+            loginFormDiv.style.display = 'none';
+            registerFormDiv.style.display = 'flex';
 
-        registerButton.classList.add('active');
-        loginButton.classList.remove('active');
-    });
+            registerButton.classList.add('active');
+            loginButton.classList.remove('active');
+        });
+    }
 
-    // --- ЛОГІКА АВТОРИЗАЦІЇ З СИНХРОНІЗАЦІЄЮ LOCALSTORAGE ---
+
+    // --- НОВА ЛОГІКА АВТОРИЗАЦІЇ З БЕКЕНДОМ ---
     
-    // Імітація бази даних користувачів з фіксованим адміном
-    let USERS_DB_INIT = [
-        { id: 1, name: 'Admin', email: 'admin@tam.com', password: 'admin', role: 'admin' },
-        { id: 2, name: 'User', email: 'user@tam.com', password: 'user', role: 'user' }
-    ];
-
-    // Функція, що повертає список користувачів (без адміна)
-    function getUsersFromLocalStorage() {
-        const storedUsers = JSON.parse(localStorage.getItem('admin_users'));
-        // Видаляємо адміністратора з цього списку, оскільки він зберігається окремо
-        return storedUsers ? storedUsers.filter(u => u.role !== 'admin') : [];
-    }
-
-    function saveUserToLocalStorage(newUser) {
-        let storedUsers = getUsersFromLocalStorage();
-        storedUsers.push(newUser);
-        // Зберігаємо лише звичайних користувачів
-        localStorage.setItem('admin_users', JSON.stringify(storedUsers)); 
-    }
+    // БАЗОВИЙ URL БЕКЕНДУ
+    const API_URL = 'http://localhost:3000/api/auth'; // Залежить від порту в server.js
 
     // Отримання полів форми входу
-    const loginEmailInput = loginFormDiv.querySelector('.inputs:nth-child(1) input');
-    const loginPasswordInput = loginFormDiv.querySelector('.inputs:nth-child(2) input');
-    const loginConfirmButton = loginFormDiv.querySelector('.button_confirm');
+    const loginEmailInput = loginFormDiv ? loginFormDiv.querySelector('.inputs:nth-child(1) input') : null;
+    const loginPasswordInput = loginFormDiv ? loginFormDiv.querySelector('.inputs:nth-child(2) input') : null;
+    const loginConfirmButton = loginFormDiv ? loginFormDiv.querySelector('.button_confirm') : null;
 
     // Отримання полів форми реєстрації
-    const regNameInput = registerFormDiv.querySelector('.inputs:nth-child(1) input');
-    const regEmailInput = registerFormDiv.querySelector('.inputs:nth-child(2) input');
-    const regPasswordInput = registerFormDiv.querySelector('.inputs:nth-child(3) input');
-    const regConfirmPasswordInput = registerFormDiv.querySelector('.inputs:nth-child(4) input');
-    const regConfirmButton = registerFormDiv.querySelector('.button_confirm');
+    const regNameInput = registerFormDiv ? registerFormDiv.querySelector('.inputs:nth-child(1) input') : null;
+    const regEmailInput = registerFormDiv ? registerFormDiv.querySelector('.inputs:nth-child(2) input') : null;
+    const regPasswordInput = registerFormDiv ? registerFormDiv.querySelector('.inputs:nth-child(3) input') : null;
+    const regConfirmPasswordInput = registerFormDiv ? registerFormDiv.querySelector('.inputs:nth-child(4) input') : null;
+    const regConfirmButton = registerFormDiv ? registerFormDiv.querySelector('.button_confirm') : null;
 
-    // Логіка Входу
-    loginConfirmButton.addEventListener('click', (event) => {
-        event.preventDefault(); 
-        
-        const email = loginEmailInput.value;
-        const password = loginPasswordInput.value;
 
-        // Збираємо всіх користувачів для перевірки (включаючи фіксованого адміна)
-        const allUsers = [...getUsersFromLocalStorage(), ...USERS_DB_INIT.filter(u => u.role === 'admin')];
-        
-        const user = allUsers.find(u => u.email === email && u.password === password);
-
-        if (user) {
-            // Використовуємо email як унікальний ID, якщо ID відсутній (для нових користувачів)
-            const userId = user.id || user.email;
-
-            localStorage.setItem('currentUser', JSON.stringify({
-                id: userId, // Зберігаємо ID або Email як ID
-                name: user.name,
-                email: user.email,
-                role: user.role 
-            }));
+    // --- Логіка Входу (Log in) ---
+    if (loginConfirmButton) {
+        loginConfirmButton.addEventListener('click', async (event) => {
+            event.preventDefault(); 
             
-            alert(`Успішний вхід! Вітаємо, ${user.name} (${user.role}).`);
-            window.location.href = 'index.html'; 
-        } else {
-            alert('Невірний email або пароль!');
-        }
-    });
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
 
-    // Логіка Реєстрації
-    regConfirmButton.addEventListener('click', (event) => {
-        event.preventDefault(); 
-        
-        const name = regNameInput.value;
-        const email = regEmailInput.value;
-        const password = regPasswordInput.value;
-        const confirmPassword = regConfirmPasswordInput.value;
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
 
-        if (name.trim() === '' || email.trim() === '' || password.trim() === '' || confirmPassword.trim() === '') {
-            alert('Всі поля мають бути заповнені!');
-            return;
-        }
+                const data = await response.json();
 
-        if (password !== confirmPassword) {
-            alert('Паролі не збігаються!');
-            return;
-        }
+                if (response.ok) {
+                    // Успішний вхід: зберігаємо токен та дані користувача
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: data.user.id,
+                        name: data.user.name,
+                        email: data.user.email,
+                        role: data.user.role 
+                    }));
+                    
+                    alert(`Успішний вхід! Вітаємо, ${data.user.name} (${data.user.role}).`);
+                    window.location.href = 'index.html'; 
+                } else {
+                    // Помилка входу
+                    alert(data.message || 'Помилка входу. Спробуйте ще раз.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Помилка підключення до сервера.');
+            }
+        });
+    }
 
-        // Перевіряємо унікальність серед усіх (локальних та фіксованих)
-        const allUsers = [...getUsersFromLocalStorage(), ...USERS_DB_INIT];
-        if (allUsers.some(u => u.email === email)) {
-            alert('Користувач з таким email вже існує!');
-            return;
-        }
+    // --- Логіка Реєстрації (Register) ---
+    if (regConfirmButton) {
+        regConfirmButton.addEventListener('click', async (event) => {
+            event.preventDefault(); 
+            
+            const name = regNameInput.value;
+            const email = regEmailInput.value;
+            const password = regPasswordInput.value;
+            const confirmPassword = regConfirmPasswordInput.value;
 
-        // Імітація успішної реєстрації
-        const newUser = { 
-            id: email, // Використовуємо email як ID
-            name, 
-            email, 
-            password, // У реальному житті тут буде хеш
-            role: 'user' 
-        }; 
-        
-        // Зберігаємо нового користувача в localStorage
-        saveUserToLocalStorage(newUser);
-        
-        // Автоматичний вхід після реєстрації
-        localStorage.setItem('currentUser', JSON.stringify({
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-            role: newUser.role 
-        }));
-        
-        alert(`Реєстрація успішна! Вітаємо, ${newUser.name}.`);
-        window.location.href = 'index.html'; 
-    });
+            if (name.trim() === '' || email.trim() === '' || password.trim() === '' || confirmPassword.trim() === '') {
+                alert('Всі поля мають бути заповнені!');
+                return;
+            }
 
-    // Ініціалізуємо ADMIN_USERS у localStorage, якщо він ще порожній
+            if (password !== confirmPassword) {
+                alert('Паролі не збігаються!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message || 'Реєстрація успішна! Тепер увійдіть.');
+                    // Перемикаємо на форму входу після успішної реєстрації
+                    if (loginButton) loginButton.click(); 
+                } else {
+                    alert(data.message || 'Помилка реєстрації. Спробуйте інший email.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Помилка підключення до сервера.');
+            }
+        });
+    }
+
+    // --- INITIALIZATION (Чистимо стару логіку) ---
     document.addEventListener('DOMContentLoaded', () => {
-        if (!localStorage.getItem('admin_users')) {
-            // Зберігаємо лише фіксованих звичайних користувачів (адмін додасться динамічно)
-            const initialUsers = USERS_DB_INIT.filter(u => u.role === 'user');
-            localStorage.setItem('admin_users', JSON.stringify(initialUsers));
-        }
+        // Стара логіка ініціалізації admin_users видалена, 
+        // оскільки вона тепер керується бекендом та MySQL.
+        // Залишаємо лише перемикання форми за замовчуванням (якщо потрібно)
     });

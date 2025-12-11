@@ -1,27 +1,19 @@
-// --- Global State ---
-// УВАГА: Завдання тепер фільтруються за ID користувача, і зберігаються під спільним ключем 'admin_tasks'
-const getCurrentUserId = () => {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    // Використовуємо id користувача, що зберігається при логіні
-    return user ? (user.id || user.email) : 'guest'; 
-}
+// tasks.js - ОНОВЛЕНИЙ ДЛЯ РОБОТИ З БЕКЕНДОМ
 
+// --- Global Constants ---
+const API_BASE_URL = 'http://localhost:3000/api'; 
 const taskContainer = document.querySelector('.tasks_cards');
 
-// Отримання полів форми за ID
+// Отримання полів форми
 const taskDeadlineInput = document.getElementById('task-deadline-input');
 const taskPrioritySelect = document.getElementById('task-priority-select');
 const taskCategorySelect = document.getElementById('task-category-select');
 const taskNameInput = document.querySelector('.add_task [type="text"]');
+const taskDescInput = document.querySelector('.add_task .add_task_textarea'); // Припустимо, ви додали textarea для опису
 const saveTaskBtn = document.querySelector('.add_task .button_save_card');
 
-// Списки для вибору
-const PRIORITIES = ['Низький', 'Середній', 'Високий'];
-
-// --- НОВИЙ СТАН РЕДАГУВАННЯ ---
-let editingTaskId = null; 
-
-// --- Header Logic (Збережено лише необхідний мінімум для функціоналу) ---
+// Елементи для Header та UI
+const burgerMenu = document.getElementById('burger-menu');
 const navMenu = document.querySelector('.under_p_service_u'); 
 const guestMenu = document.querySelector('.under_p_service_g');
 const userPanel = document.querySelector('.user_panel');
@@ -29,400 +21,446 @@ const adminPanel = document.querySelector('.admin_div');
 const userNameDisplay = document.getElementById('name_u_footer');
 const adminLink = document.querySelector('.admin_a');
 const logoutButton = document.querySelector('.button_logout');
-const burgerMenu = document.getElementById('burger-menu');
+const filterMenu = document.querySelector('.dropdown-menu');
+const filterArrow = document.querySelector('.arrow_filtr');
+const searchInput = document.querySelector('.input_search');
 
-function redirectToLogin() {
-    window.location.href = 'loginsignup.html';
-}
-
-function updateAuthUI() {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    const isLoggedIn = !!user;
-
-    navMenu.classList.remove('active');
-    guestMenu.classList.remove('active');
-
-    if (isLoggedIn) {
-        navMenu.classList.add('visible-desktop');
-        guestMenu.classList.remove('visible-desktop');
-        guestMenu.style.display = 'none';
-        userNameDisplay.textContent = user.name;
-
-        if (user.role === 'admin') {
-            adminLink.style.display = 'block'; 
-        } else {
-            adminLink.style.display = 'none'; 
-        }
-        
-        renderTasks();
-    } else {
-        alert('Для доступу до завдань потрібно авторизуватися.');
-        redirectToLogin(); 
-    }
-}
-
-if (burgerMenu) {
-        burgerMenu.addEventListener('click', () => {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            const isLoggedIn = !!user;
-
-            if (isLoggedIn) {
-                // Якщо користувач: перемикаємо меню користувача
-                guestMenu.classList.remove('active'); 
-                navMenu.classList.toggle('active');
-            } else {
-                // Якщо гість: перемикаємо гостьове меню
-                navMenu.classList.remove('active'); 
-                guestMenu.classList.toggle('active');
-            }
-        });
-    }
-
-// Випадаюче меню адміна та Вийти (залишається без змін)
-if (userPanel && adminPanel) {
-    userPanel.addEventListener('click', (event) => {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (user && user.role === 'admin') {
-            adminPanel.classList.toggle('active');
-        }
-    });
-
-    window.addEventListener('click', (event) => {
-        if (!userPanel.contains(event.target) && !adminPanel.contains(event.target)) {
-            adminPanel.classList.remove('active');
-        }
-    });
-}
-
-if (logoutButton) {
-    logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('currentUser');
-        updateAuthUI();
-        window.location.href = 'index.html'; 
-    });
-}
-
-// ----------------------------------------------------------------------
-// --- Task Management Logic (Оновлено для синхронізації) ---
-// ----------------------------------------------------------------------
-
-function getTasksForCurrentUser() {
-    const allTasks = JSON.parse(localStorage.getItem('admin_tasks')) || [];
-    const userId = getCurrentUserId();
-    // Фільтруємо завдання, показуючи тільки ті, що належать поточному користувачу
-    return allTasks.filter(task => task.userId === userId);
-}
-
-function saveTask(newTaskData = null, taskIdToRemove = null) {
-    const allTasks = JSON.parse(localStorage.getItem('admin_tasks')) || [];
-    let updatedTasks = [...allTasks];
-    const userId = getCurrentUserId();
-    const isNew = !newTaskData || !newTaskData.isEdit;
-
-    if (taskIdToRemove) {
-        // Видалення завдання
-        updatedTasks = updatedTasks.filter(task => task.id !== taskIdToRemove);
-    } 
-    
-    if (newTaskData) {
-        if (newTaskData.isEdit) {
-             // Редагування існуючого завдання
-             const index = updatedTasks.findIndex(t => t.id === newTaskData.id && t.userId === userId);
-             if (index !== -1) {
-                 updatedTasks[index] = { ...updatedTasks[index], ...newTaskData };
-                 delete updatedTasks[index].isEdit;
-             }
-        } else {
-            // Додавання нового завдання
-            const newTask = { 
-                ...newTaskData, 
-                id: Date.now(), 
-                userId: userId, // Додаємо ID користувача
-                completed: false 
-            };
-            updatedTasks.push(newTask);
-        }
-    }
-
-    localStorage.setItem('admin_tasks', JSON.stringify(updatedTasks));
-    return updatedTasks.filter(task => task.userId === userId); // Повертаємо лише завдання користувача
-}
-
-function renderTasks(filter = 'all', keyword = '') {
-    let tasks = getTasksForCurrentUser();
-    taskContainer.innerHTML = '';
-    
-    let filteredTasks = tasks;
-
-    // 1. Пошук за назвою
-    if (keyword) {
-        const normalizedKeyword = keyword.toLowerCase();
-        filteredTasks = filteredTasks.filter(task => 
-            task.name.toLowerCase().includes(normalizedKeyword)
-        );
-    }
-    
-    // 2. Фільтрація
-    switch (filter) {
-        case 'priority':
-            const priorityOrder = { 'Високий': 3, 'Середній': 2, 'Низький': 1 };
-            filteredTasks.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
-            break;
-        case 'completed':
-            filteredTasks = filteredTasks.filter(task => task.completed);
-            break;
-        case 'uncompleted':
-            filteredTasks = filteredTasks.filter(task => !task.completed);
-            break;
-        case 'newest':
-        default:
-            filteredTasks.sort((a, b) => b.id - a.id);
-            break;
-    }
+const addTaskBackground = document.querySelector('.add_task_background');
+const buttonAdd = document.querySelector('.button_add');
 
 
-    if (filteredTasks.length === 0) {
-        taskContainer.innerHTML = '<p style="color:#3B82F6; font-size:20px; width:100%; text-align:center; padding: 40px;">Завдань не знайдено.</p>';
-        return;
-    }
-
-
-    filteredTasks.forEach(task => {
-        const card = document.createElement('div');
-        card.classList.add('task_card');
-        if (task.completed) {
-            card.style.opacity = '0.6';
-            card.style.backgroundColor = '#e0f7fa';
-        }
-
-        const completeText = task.completed ? 'Скасувати' : 'Виконано';
-        const completeClass = task.completed ? 'button_uncomplete' : 'button_complete';
-        
-        card.innerHTML = `
-            <p class="name_p" style="text-decoration: ${task.completed ? 'line-through' : 'none'};">${task.name}</p>
-            <p class="inf_p">Deadline: ${task.deadline || 'N/A'}</p>
-            <p class="inf_p">Priority: ${task.priority || 'N/A'}</p>
-            <p class="inf_p">Category: ${task.category || 'N/A'}</p>
-            <button class="${completeClass} button_edit" data-id="${task.id}">${completeText}</button>
-            <button class="button_delete" data-id="${task.id}">Видалити</button>
-        `;
-        taskContainer.appendChild(card);
-    });
-
-    // Додаємо обробники подій для кнопок
-    taskContainer.querySelectorAll('.button_delete').forEach(btn => {
-        btn.addEventListener('click', deleteTask);
-    });
-    taskContainer.querySelectorAll('.button_complete, .button_uncomplete').forEach(btn => {
-        btn.addEventListener('click', toggleCompleteTask);
-    });
-    taskContainer.querySelectorAll('.button_edit[data-id]').forEach(btn => {
-        if (btn.textContent === 'Редагувати') {
-             btn.addEventListener('click', openTaskModalForEdit);
-        }
-    });
-}
-
-// Функції керування завданнями
-function addTask(name, deadline, priority, category) {
-    const newTaskData = { name, deadline, priority, category };
-    saveTask(newTaskData);
-    renderTasks();
-}
-
-function editTask(id, name, deadline, priority, category) {
-    const updatedData = { 
-        id, 
-        name, 
-        deadline, 
-        priority, 
-        category,
-        isEdit: true
-    };
-    saveTask(updatedData);
-    renderTasks();
-}
-
-function deleteTask(event) {
-    const id = Number(event.target.dataset.id);
-    saveTask(null, id);
-    renderTasks();
-}
-
-function toggleCompleteTask(event) {
-    const id = Number(event.target.dataset.id);
-    const userId = getCurrentUserId();
-    
-    // Отримуємо повний масив і оновлюємо
-    const allTasks = JSON.parse(localStorage.getItem('admin_tasks')) || [];
-    const globalIndex = allTasks.findIndex(t => t.id === id && t.userId === userId);
-    
-    if (globalIndex !== -1) {
-         allTasks[globalIndex].completed = !allTasks[globalIndex].completed;
-         localStorage.setItem('admin_tasks', JSON.stringify(allTasks));
-         renderTasks();
-    }
-}
-
-
-// ----------------------------------------------------------------------
-// --- Modal Windows and Forms Logic ---
-// ----------------------------------------------------------------------
-
-function populateSelects() {
-    // 1. Пріоритет
-    taskPrioritySelect.innerHTML = PRIORITIES.map(p => `<option value="${p}">${p}</option>`).join('');
-
-    // 2. Категорії 
-    const categories = JSON.parse(localStorage.getItem('admin_categories')) || [{name:'Особисте'}, {name:'Робота'}, {name:'Навчання'}, {name:'Інше'}];
-    taskCategorySelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join(''); 
-}
-
-
-// Add Task Modal
-const addTaskBack = document.querySelector('.add_task_background');
-const addTaskModal = document.querySelector('.add_task');
-const addTaskBtn = document.querySelector('.button_add');
-
-
-// Режим додавання
-addTaskBtn.addEventListener('click', () => {
-    addTaskBack.classList.add('active');
-    editingTaskId = null; // Скидаємо режим редагування
-    
-    // Очищення полів форми та встановлення значень за замовчуванням
-    taskNameInput.value = ''; 
-    if (taskDeadlineInput) taskDeadlineInput.value = '';
-    
-    populateSelects();
-    saveTaskBtn.textContent = 'Зберегти';
-});
-
-// Режим редагування
-function openTaskModalForEdit(event) {
-    const id = Number(event.target.dataset.id);
-    const tasks = getTasksForCurrentUser();
-    const task = tasks.find(t => t.id === id);
-
-    if (task) {
-        editingTaskId = id;
-        addTaskBack.classList.add('active'); 
-        
-        // Заповнення полів форми даними завдання
-        taskNameInput.value = task.name;
-        if (taskDeadlineInput) taskDeadlineInput.value = task.deadline || '';
-
-        // Заповнення select-ів
-        populateSelects();
-        if (taskPrioritySelect) taskPrioritySelect.value = task.priority || PRIORITIES[0];
-        if (taskCategorySelect) taskCategorySelect.value = task.category || 'Інше';
-
-        // Оновлення тексту кнопки
-        saveTaskBtn.textContent = 'Зберегти зміни';
-    }
-}
-
-// Кнопка Зберегти/Редагувати Завдання
-saveTaskBtn.addEventListener('click', () => {
-    
-    const name = taskNameInput ? taskNameInput.value.trim() : '';
-    const deadline = taskDeadlineInput ? taskDeadlineInput.value : '';
-    const priority = taskPrioritySelect ? taskPrioritySelect.value : 'N/A';
-    const category = taskCategorySelect ? taskCategorySelect.value : 'N/A';
-
-    if (name) {
-        if (editingTaskId) {
-            // РЕЖИМ РЕДАГУВАННЯ
-            editTask(editingTaskId, name, deadline, priority, category);
-        } else {
-            // РЕЖИМ ДОДАВАННЯ
-            addTask(name, deadline, priority, category);
-        }
-        addTaskBack.classList.remove('active');
-    } else {
-        alert('Назва завдання є обов\'язковою!');
-    }
-});
-
-// Closing Add/Edit Task Modal (Outside click)
-window.addEventListener('click', (event) => {
-    if (addTaskBtn.contains(event.target)) return; 
-    if (!addTaskModal.contains(event.target) && addTaskBack.classList.contains('active')) {
-        addTaskBack.classList.remove('active');
-        saveTaskBtn.textContent = 'Зберегти'; // Скидаємо текст кнопки при закритті
-    }
-});
-
-
-// Add Category Modal (Оновлюємо логіку додавання категорії)
 const addCategoryBackground = document.querySelector('.add_category_background');
 const addCategoryModal = document.querySelector('.add_category');
 const buttonCategory = document.querySelector('.button_category');
-const saveCategoryBtnModal = addCategoryModal.querySelector('.button_save_card'); 
-const categoryInput = addCategoryModal.querySelector('.inout_add_card'); 
+const saveCategoryBtnModal = addCategoryModal ? addCategoryModal.querySelector('.button_save_card') : null; 
+const categoryInput = addCategoryModal ? addCategoryModal.querySelector('.inout_add_card') : null; 
 
-buttonCategory.addEventListener('click', () => {
-    addCategoryBackground.classList.add('active');
-    categoryInput.value = ''; 
-});
+if (buttonCategory) {
+    buttonCategory.addEventListener('click', () => {
+        if (addCategoryBackground) addCategoryBackground.classList.add('active');
+        if (categoryInput) categoryInput.value = ''; 
+    });
+}
 
-// Збереження нової категорії
+// Збереження нової категорії через API
 if (saveCategoryBtnModal) {
-    saveCategoryBtnModal.addEventListener('click', () => {
+    saveCategoryBtnModal.addEventListener('click', async () => {
         const newCategory = categoryInput.value.trim();
-        let categories = JSON.parse(localStorage.getItem('admin_categories')) || [];
-
-        if (newCategory && !categories.some(c => c.name === newCategory)) {
-            categories.push({ name: newCategory, count: 0 }); // Додаємо як об'єкт
-            localStorage.setItem('admin_categories', JSON.stringify(categories));
-            populateSelects(); 
-            addCategoryBackground.classList.remove('active');
-        } else if (categories.some(c => c.name === newCategory)) {
-            alert('Така категорія вже існує!');
-        } else {
+        if (!newCategory) {
             alert('Введіть назву категорії.');
+            return;
+        }
+
+        try {
+            // POST запит до API для створення категорії
+            const result = await apiFetch('/categories', {
+                method: 'POST',
+                body: JSON.stringify({ name: newCategory })
+            });
+
+            alert(result.message || `Категорія "${result.name}" успішно створена!`);
+            
+            // Перезавантажуємо список категорій у модальному вікні завдання
+            await fetchCategories(); 
+            
+            if (addCategoryBackground) addCategoryBackground.classList.remove('active');
+        
+        } catch (error) {
+            console.error('Error creating category:', error);
+            alert(error.message || 'Помилка при створенні категорії.');
         }
     });
 }
 
-// Closing Add Category Modal (Outside click)
+// Closing Add Category Modal (Outside click - залишається без змін)
 window.addEventListener('click', (event) => {
-    if (buttonCategory.contains(event.target)) return; 
-    if (!addCategoryModal.contains(event.target) && addCategoryBackground.classList.contains('active')) {
+    if (buttonCategory && buttonCategory.contains(event.target)) return; 
+    if (addCategoryModal && !addCategoryModal.contains(event.target) && addCategoryBackground && addCategoryBackground.classList.contains('active')) {
         addCategoryBackground.classList.remove('active');
     }
 });
 
 
-// ----------------------------------------------------------------------
-// --- Filter and Search Logic ---
-// ----------------------------------------------------------------------
+// Стан редагування
+let editingTaskId = null; 
+let allCategories = []; // Зберігаємо категорії для вибору
 
-const searchInput = document.querySelector('.input_p');
-const filterBtn = document.getElementById('filter-toggle-btn');
-const filterMenu = document.getElementById('filter-menu');
-const filterArrow = filterBtn ? filterBtn.querySelector('.arrow-down') : null;
+// --- AUTH UTILS ---
+const getCurrentUserId = () => {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    return user ? user.id : null; 
+}
+const getAuthToken = () => {
+    return localStorage.getItem('authToken');
+}
+function redirectToLogin() {
+    window.location.href = 'login.html';
+}
 
+// --- CORE FETCH FUNCTION ---
+// Допоміжна функція для надсилання запитів з токеном
+async function apiFetch(endpoint, options = {}) {
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('User not authenticated. Redirecting to login.');
+    }
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers 
+    };
 
-// Фільтр: Відкриття/Закриття
-if (filterBtn && filterMenu) {
-    filterBtn.addEventListener('click', (event) => {
-        filterMenu.classList.toggle('show');
-        if (filterArrow) filterArrow.classList.toggle('rotated');
-        event.stopPropagation();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers
     });
     
-    // Закриття фільтра по кліку поза ним
-    window.addEventListener('click', (event) => {
-        if (!filterBtn.contains(event.target) && !filterMenu.contains(event.target)) {
-            if (filterMenu.classList.contains('show')) {
-                filterMenu.classList.remove('show');
-                if (filterArrow) filterArrow.classList.remove('rotated');
+    if (response.status === 401 || response.status === 403) {
+        // Якщо токен недійсний, скидаємо його та перенаправляємо
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        redirectToLogin();
+        return; // Зупиняємо виконання
+    }
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'API request failed');
+    }
+
+    return response.json().catch(() => ({})); // Повертає {} для DELETE/PUT, які можуть не мати тіла
+}
+
+
+// ----------------------------------------------------------------------
+// --- CATEGORY & SELECT LOGIC ---
+// ----------------------------------------------------------------------
+
+async function fetchCategories() {
+    try {
+        const categories = await apiFetch('/categories');
+        allCategories = categories;
+        populateCategorySelect(categories);
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+    }
+}
+
+function populateCategorySelect(categories) {
+    if (!taskCategorySelect) return;
+    taskCategorySelect.innerHTML = '<option value="">Оберіть категорію</option>';
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id; // ID категорії з БД
+        option.textContent = category.name;
+        taskCategorySelect.appendChild(option);
+    });
+}
+
+// Заповнення пріоритетів (залишається локальним)
+function populatePrioritySelect() {
+    const PRIORITIES = ['Низький', 'Середній', 'Високий'];
+    if (!taskPrioritySelect) return;
+    taskPrioritySelect.innerHTML = '';
+    PRIORITIES.forEach(priority => {
+        const option = document.createElement('option');
+        option.value = priority;
+        option.textContent = priority;
+        taskPrioritySelect.appendChild(option);
+    });
+}
+
+
+// ----------------------------------------------------------------------
+// --- TASK CRUD LOGIC ---
+// ----------------------------------------------------------------------
+
+// 1. READ (Отримати завдання)
+async function fetchAndRenderTasks(filterType = 'all', searchKeyword = '') {
+    try {
+        const tasks = await apiFetch('/tasks');
+        
+        let filteredTasks = tasks;
+
+        // Фільтрація
+        if (filterType === 'completed') {
+            filteredTasks = filteredTasks.filter(t => t.Status === 'Виконане');
+        } else if (filterType === 'uncompleted') {
+            filteredTasks = filteredTasks.filter(t => t.Status !== 'Виконане');
+        } else if (filterType === 'priority') {
+            // Припускаємо сортування за 'Високий' > 'Середній' > 'Низький'
+            filteredTasks.sort((a, b) => {
+                const order = { 'Високий': 3, 'Середній': 2, 'Низький': 1 };
+                return order[b.Priority] - order[a.Priority];
+            });
+        } else if (filterType === 'newest') {
+            // Сортування за датою створення (TaskID)
+            filteredTasks.sort((a, b) => b.TaskID - a.TaskID); 
+        }
+
+        // Пошук
+        if (searchKeyword) {
+            const keyword = searchKeyword.toLowerCase();
+            filteredTasks = filteredTasks.filter(t => 
+                t.Title.toLowerCase().includes(keyword) || 
+                (t.Description && t.Description.toLowerCase().includes(keyword))
+            );
+        }
+
+        renderTasksToDOM(filteredTasks);
+
+    } catch (error) {
+        console.error("Error fetching and rendering tasks:", error);
+        taskContainer.innerHTML = '<p class="no_tasks">Не вдалося завантажити завдання. Спробуйте пізніше.</p>';
+    }
+}
+
+// 2. CREATE (Створити/Оновити)
+if (saveTaskBtn) {
+    saveTaskBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        
+        const title = taskNameInput.value.trim();
+        const description = taskDescInput ? taskDescInput.value.trim() : '';
+        const priority = taskPrioritySelect.value;
+        const category_id = taskCategorySelect.value;
+        const due_date = taskDeadlineInput.value;
+
+        if (!title || !priority || !category_id) {
+            alert('Будь ласка, заповніть Назву, Пріоритет та Категорію.');
+            return;
+        }
+
+        const taskData = {
+            title,
+            description,
+            priority,
+            category_id: parseInt(category_id), 
+            due_date: due_date || null // Якщо порожнє, передаємо null
+        };
+        
+        try {
+            if (editingTaskId) {
+                // ОНОВЛЕННЯ (PUT)
+                await apiFetch(`/tasks/${editingTaskId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(taskData)
+                });
+                alert('Завдання успішно оновлено!');
+            } else {
+                // СТВОРЕННЯ (POST)
+                await apiFetch('/tasks', {
+                    method: 'POST',
+                    body: JSON.stringify(taskData)
+                });
+                alert('Завдання успішно створено!');
             }
+
+            // Очищення форми
+            clearTaskForm();
+            editingTaskId = null;
+            
+            // Перезавантаження списку завдань
+            fetchAndRenderTasks();
+
+        } catch (error) {
+            console.error('Task save error:', error);
+            alert(error.message || 'Помилка при збереженні завдання.');
+        }
+    });
+}
+
+function clearTaskForm() {
+    if (taskNameInput) taskNameInput.value = '';
+    if (taskDescInput) taskDescInput.value = '';
+    if (taskDeadlineInput) taskDeadlineInput.value = '';
+    // Скидаємо селекти
+    if (taskPrioritySelect) taskPrioritySelect.value = taskPrioritySelect.options[0].value;
+    if (taskCategorySelect) taskCategorySelect.value = ''; 
+    
+    if (saveTaskBtn) saveTaskBtn.textContent = 'Зберегти';
+}
+
+// 3. UPDATE (Toggle Completion)
+async function toggleCompleteTask(taskId, isCompleted) {
+    try {
+        await apiFetch(`/tasks/${taskId}/toggle`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_completed: !isCompleted })
+        });
+        
+        // Перезавантаження завдань після успішного оновлення
+        fetchAndRenderTasks(document.querySelector('.p_filtr').dataset.filter || 'all', searchInput.value);
+
+    } catch (error) {
+        console.error('Toggle completion error:', error);
+        alert(error.message || 'Помилка при зміні статусу завдання.');
+    }
+}
+
+// 4. DELETE (Видалити завдання)
+async function deleteTask(taskId) {
+    if (!confirm('Ви впевнені, що хочете видалити це завдання?')) {
+        return;
+    }
+    try {
+        await apiFetch(`/tasks/${taskId}`, {
+            method: 'DELETE'
+        });
+        
+        alert('Завдання видалено.');
+        // Перезавантаження завдань
+        fetchAndRenderTasks(document.querySelector('.p_filtr').dataset.filter || 'all', searchInput.value);
+
+    } catch (error) {
+        console.error('Delete task error:', error);
+        alert(error.message || 'Помилка при видаленні завдання.');
+    }
+}
+
+// 5. EDIT (Завантажити дані завдання у форму)
+async function editTask(taskId) {
+    try {
+        // Отримуємо всі завдання, потім знаходимо потрібне
+        const allTasks = await apiFetch('/tasks');
+        const taskToEdit = allTasks.find(t => t.TaskID === taskId);
+
+        if (!taskToEdit) {
+            alert('Завдання для редагування не знайдено.');
+            return;
+        }
+
+        // Заповнюємо форму
+        editingTaskId = taskId;
+        taskNameInput.value = taskToEdit.Title;
+        if (taskDescInput) taskDescInput.value = taskToEdit.Description || '';
+        taskDeadlineInput.value = taskToEdit.DueDate ? new Date(taskToEdit.DueDate).toISOString().substring(0, 10) : '';
+        taskPrioritySelect.value = taskToEdit.Priority;
+        
+        // Знаходимо CategoryID за назвою (потрібно додати CategoryID до taskToEdit у бекенді)
+        const category = allCategories.find(c => c.name === taskToEdit.Category);
+        if (category) {
+            taskCategorySelect.value = category.id;
+        }
+
+        if (saveTaskBtn) saveTaskBtn.textContent = 'Оновити завдання';
+        
+        // Прокрутка до форми
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('Error loading task for editing:', error);
+        alert(error.message || 'Помилка завантаження даних завдання.');
+    }
+}
+
+// ----------------------------------------------------------------------
+// --- DOM RENDERING ---
+// ----------------------------------------------------------------------
+
+// tasks.js (ОНОВЛЕНА ФУНКЦІЯ renderTasksToDOM)
+// Використовуємо класи з admin.js (task_card, name_p, inf_p) для уніфікації стилів.
+
+function renderTasksToDOM(tasks) {
+    if (!taskContainer) return;
+    taskContainer.innerHTML = '';
+
+    if (tasks.length === 0) {
+        taskContainer.innerHTML = '<p class="no_tasks">Завдань не знайдено.</p>';
+        return;
+    }
+
+    tasks.forEach(task => {
+        const isCompleted = task.Status === 'Виконане';
+        const card = document.createElement('div');
+        
+        // Використовуємо класи, які ви стилізували, та додаємо клас для статусу
+        card.className = `task_card ${isCompleted ? 'completed' : 'active'}`;
+        card.dataset.id = task.TaskID;
+        let formattedDate = '';
+        if (task.DueDate) {
+            // 1. Створюємо об'єкт Date з UTC-рядка
+            const dateObj = new Date(task.DueDate);
+            
+            // 2. Форматуємо дату відповідно до локалі (наприклад, uk-UA)
+            // options: { day: 'numeric', month: 'long', year: 'numeric' }
+            // Або простіше: 'YYYY-MM-DD'
+            formattedDate = dateObj.toLocaleDateString('uk-UA', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
+        }
+        // Зверніть увагу: ми використовуємо inf_p для всіх деталей, як у admin.js
+        card.innerHTML = `
+            <p class="name_p">${task.Title}</p>
+            <p class="inf_p">Статус: ${task.Status}</p>
+            <p class="inf_p">Пріоритет: ${task.Priority}</p>
+            <p class="inf_p">Категорія: ${task.Category}</p>
+            ${task.DueDate ? `<p class="inf_p">Дедлайн: ${formattedDate}</p>` : ''}
+            
+            <div class="card_actions" style="display: flex; gap: 10px; margin-top: 10px;flex-direction: column;">
+                <button class="button_edit" data-id="${task.TaskID}">Редагувати</button>
+                <button class="button_delete" data-id="${task.TaskID}">Видалити</button>
+            </div>
+            
+            <label class="checkbox_container" style="margin-top: 10px; display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" ${isCompleted ? 'checked' : ''} data-id="${task.TaskID}">
+                <p class="status_text">${isCompleted ? 'Виконано' : 'Активне'}</p>
+            </label>
+        `;
+
+        // Обробники подій для карток (залишаються без змін, але тепер використовують кнопки)
+        card.querySelector('.button_edit').addEventListener('click', (e) => editTask(parseInt(e.target.dataset.id)));
+        card.querySelector('.button_delete').addEventListener('click', (e) => deleteTask(parseInt(e.target.dataset.id)));
+        card.querySelector('input[type="checkbox"]').addEventListener('change', (e) => 
+            toggleCompleteTask(parseInt(e.target.dataset.id), e.target.checked)
+        );
+
+        taskContainer.appendChild(card);
+    });
+}
+
+
+// ----------------------------------------------------------------------
+// --- INITIALIZATION AND EVENT LISTENERS ---
+// ----------------------------------------------------------------------
+
+// Захист сторінки та завантаження даних
+function initializePage() {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const authToken = getAuthToken();
+    const isLoggedIn = !!user && !!authToken;
+
+    if (!isLoggedIn) {
+        alert('Для доступу до завдань потрібно авторизуватися.');
+        redirectToLogin(); 
+        return; 
+    }
+
+    // Оновлення UI (для tasks.html)
+    if (userNameDisplay) userNameDisplay.textContent = user.name;
+    if (adminLink) adminLink.style.display = user.role === 'admin' ? 'block' : 'none';
+
+    // Завантаження категорій та завдань
+    populatePrioritySelect();
+    fetchCategories().then(() => {
+        fetchAndRenderTasks();
+    });
+}
+
+// Обробники фільтрів
+if (filterMenu) {
+    // Обробник для перемикання випадаючого меню
+    document.querySelector('.filtr_dropdown').addEventListener('click', (event) => {
+        if (event.target.closest('.filtr_dropdown')) {
+            filterMenu.classList.toggle('show');
+            if (filterArrow) filterArrow.classList.toggle('rotated');
         }
     });
 
-    // Фільтр: Обробка вибору
+    // Обробник вибору фільтра
     filterMenu.addEventListener('click', (event) => {
         if (event.target.classList.contains('dropdown-item')) {
             event.preventDefault();
@@ -434,12 +472,7 @@ if (filterBtn && filterMenu) {
 
             let currentKeyword = searchInput ? searchInput.value : '';
             
-            // Викликаємо renderTasks з новим типом фільтрації
-            if (['completed', 'uncompleted', 'priority', 'newest'].includes(filterType)) {
-                renderTasks(filterType, currentKeyword);
-            } else {
-                renderTasks('all', currentKeyword); 
-            }
+            fetchAndRenderTasks(filterType, currentKeyword);
 
             filterMenu.classList.remove('show');
             if (filterArrow) filterArrow.classList.remove('rotated');
@@ -447,13 +480,56 @@ if (filterBtn && filterMenu) {
     });
 }
 
-// Пошук: Обробка вводу
+// Обробник пошуку
 if (searchInput) {
     searchInput.addEventListener('input', () => {
         const currentFilter = document.querySelector('.p_filtr').dataset.filter || 'all';
-        renderTasks(currentFilter, searchInput.value);
+        fetchAndRenderTasks(currentFilter, searchInput.value);
     });
 }
 
-// Ініціалізація стану при завантаженні сторінки
-document.addEventListener('DOMContentLoaded', updateAuthUI);
+// Обробник кнопки "Вийти" (скопійовано з script.js)
+if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken'); 
+        fetch('http://localhost:3000/api/auth/logout', { method: 'POST' });
+        redirectToLogin(); 
+    });
+}
+// tasks.js (Новий код для відкриття та закриття модального вікна завдання)
+
+// --- Обробники для модального вікна "Щось нове" ---
+
+if (buttonAdd && addTaskBackground) {
+    buttonAdd.addEventListener('click', () => {
+        // Очищаємо форму перед відкриттям
+        clearTaskForm();
+        editingTaskId = null; 
+        
+        // Відкриваємо модальне вікно
+        addTaskBackground.classList.add('active');
+    });
+}
+
+// Обробник для закриття модального вікна при натисканні на фон
+if (addTaskBackground) {
+    addTaskBackground.addEventListener('click', (event) => {
+        // Якщо клік був саме по фону, а не всередині модального вікна
+        const addTaskModal = document.querySelector('.add_task'); 
+        if (!addTaskModal.contains(event.target) && event.target === addTaskBackground) {
+            addTaskBackground.classList.remove('active');
+        }
+    });
+}
+
+// Додатково: закриття модального вікна через кнопку "Скасувати" 
+// (Якщо ви додавали таку кнопку у HTML для зручності)
+// let cancelButton = document.querySelector('.add_task .button_cancel_card'); 
+// if (cancelButton) {
+//     cancelButton.addEventListener('click', () => {
+//         addTaskBackground.classList.remove('active');
+//     });
+// }
+
+document.addEventListener('DOMContentLoaded', initializePage);
