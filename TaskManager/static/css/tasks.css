@@ -46,7 +46,7 @@ img.img_scr {
     border-radius: 16px;
     background-color: #ffffff;
     min-height: 50px;
-    gap: 20px;
+    gap: 9px;
 }
 input.input_p {
     border: none;
@@ -332,4 +332,170 @@ button.button_p:hover{
     background: white;
     border-radius: 16px;
     padding: 20px;
+}
+/* ================================== */
+/* === ДОДАТКОВІ СТИЛІ ДЛЯ ФІЛЬТРАЦІЇ === */
+/* ================================== */
+
+/* Стилі для контейнера фільтра */
+.filter-dropdown-container {
+    position: relative;
+    width: 80%;
+}
+
+
+
+/* Стилі для стрілки */
+.filter-button .arrow-down {
+    transition: transform 0.3s ease;
+}
+
+.filter-button .arrow-down.rotated {
+    transform: rotate(180deg);
+}
+
+/* Стилі для випадаючого меню */
+.filter-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.filter-dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стилі для елементів меню */
+.dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+    background: none;
+    font-family: inherit;
+}
+
+.dropdown-item:hover {
+    background-color: #f4f4f4;
+}
+
+/* Роздільник */
+.dropdown-divider {
+    height: 1px;
+    background-color: #eeeeee;
+    margin: 5px 0;
+}
+
+/* Червоний елемент для скидання */
+.dropdown-item.danger {
+    color: #EF4444;
+    font-weight: 500;
+}
+
+.dropdown-item.danger:hover {
+    background-color: #fef2f2;
+}
+
+/* Стилі для активного фільтра */
+.p_filtr {
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+}
+
+/* Стилі для пошукового поля */
+.but_div input.input_p {
+    width: 70%;
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+}
+
+.but_div input.input_p:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Забезпечення відступів для карток завдань */
+.tasks_cards::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tasks_cards::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.tasks_cards::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 10px;
+}
+
+.tasks_cards::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* ================================== */
+/* === СТИЛІ ДЛЯ СТАТУСУ ЗАВДАНЬ === */
+/* ================================== */
+.task_card.completed {
+    opacity: 0.8;
+    background-color: #f9f9f9;
+}
+
+.task_card.completed .name_p {
+    color: #6b7280;
+    text-decoration: line-through;
+}
+
+.task_card.completed .inf_p {
+    color: #9ca3af;
+}
+
+/* Стилі для чекбокса статусу */
+.checkbox_container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.checkbox_container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.status_text {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    font-weight: 500;
+}
+img.img_scr.arrow-down {
+    display: none;
 }

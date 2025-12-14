@@ -23,8 +23,7 @@ const adminLink = document.querySelector('.admin_a');
 const logoutButton = document.querySelector('.button_logout');
 const filterMenu = document.querySelector('.dropdown-menu');
 const filterArrow = document.querySelector('.arrow_filtr');
-const searchInput = document.querySelector('.input_search');
-
+const searchInput = document.querySelector('.input_p');
 const addTaskBackground = document.querySelector('.add_task_background');
 const buttonAdd = document.querySelector('.button_add');
 
@@ -175,29 +174,57 @@ function populatePrioritySelect() {
 // ----------------------------------------------------------------------
 // --- TASK CRUD LOGIC ---
 // ----------------------------------------------------------------------
+// --- Змінено селектори для відповідності HTML ---
+const filterMenuM = document.getElementById('filter-menu'); // ЗМІНА: з .dropdown-menu на #filter-menu
+const filterArrowD = document.querySelector('.arrow-down'); // ЗМІНА: з .arrow_filtr на .arrow-down
+const filterToggleButton = document.getElementById('filter-toggle-btn');
 
-// 1. READ (Отримати завдання)
+// --- Виправлений обробник ВІДКРИТТЯ/ЗАКРИТТЯ ФІЛЬТРА ---
+if (filterToggleButton && filterMenuM && filterArrowD) {
+    filterToggleButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Запобігаємо баблінгу
+        // 1. Перемикаємо клас 'show' на самому меню
+        filterMenuM.classList.toggle('show');
+        // 2. Перемикаємо клас 'rotated' на стрілці
+        filterArrowD.classList.toggle('rotated');
+    });
+}
+
+// --- Виправлений обробник СКРИВАННЯ ПРИ КЛІКУ ПОЗА МЕНЮ ---
+document.addEventListener('click', (event) => {
+    // Якщо клік не був на кнопці-тригері і не був на самому меню, закрити його
+    if (filterMenuM && filterMenuM.classList.contains('show') && 
+        !filterToggleButton.contains(event.target) && 
+        !filterMenuM.contains(event.target)) {
+        
+        filterMenuM.classList.remove('show');
+        if (filterArrowD) filterArrowD.classList.remove('rotated');
+    }
+});
+
+// --- Оновлена функція fetchAndRenderTasks ---
 async function fetchAndRenderTasks(filterType = 'all', searchKeyword = '') {
     try {
         const tasks = await apiFetch('/tasks');
         
         let filteredTasks = tasks;
 
-        // Фільтрація
+        // Фільтрація за типом
         if (filterType === 'completed') {
             filteredTasks = filteredTasks.filter(t => t.Status === 'Виконане');
         } else if (filterType === 'uncompleted') {
-            filteredTasks = filteredTasks.filter(t => t.Status !== 'Виконане');
+            filteredTasks = filteredTasks.filter(t => t.Status === 'Активне');
         } else if (filterType === 'priority') {
-            // Припускаємо сортування за 'Високий' > 'Середній' > 'Низький'
-            filteredTasks.sort((a, b) => {
-                const order = { 'Високий': 3, 'Середній': 2, 'Низький': 1 };
-                return order[b.Priority] - order[a.Priority];
-            });
+            // Сортування за пріоритетом (Високий > Середній > Низький)
+            const priorityOrder = { 'Високий': 3, 'Середній': 2, 'Низький': 1 };
+            filteredTasks = filteredTasks.sort((a, b) => 
+                priorityOrder[b.Priority] - priorityOrder[a.Priority]
+            );
         } else if (filterType === 'newest') {
-            // Сортування за датою створення (TaskID)
-            filteredTasks.sort((a, b) => b.TaskID - a.TaskID); 
+            // Спочатку нові (за ID або датою створення)
+            filteredTasks = filteredTasks.sort((a, b) => b.TaskID - a.TaskID);
         }
+        // 'all' - без фільтрації
 
         // Пошук
         if (searchKeyword) {
@@ -287,7 +314,7 @@ async function toggleCompleteTask(taskId, isCompleted) {
     try {
         await apiFetch(`/tasks/${taskId}/toggle`, {
             method: 'PATCH',
-            body: JSON.stringify({ is_completed: !isCompleted })
+            body: JSON.stringify({ is_completed: isCompleted })
         });
         
         // Перезавантаження завдань після успішного оновлення
@@ -415,7 +442,8 @@ function renderTasksToDOM(tasks) {
         card.querySelector('.button_edit').addEventListener('click', (e) => editTask(parseInt(e.target.dataset.id)));
         card.querySelector('.button_delete').addEventListener('click', (e) => deleteTask(parseInt(e.target.dataset.id)));
         card.querySelector('input[type="checkbox"]').addEventListener('change', (e) => 
-            toggleCompleteTask(parseInt(e.target.dataset.id), e.target.checked)
+            // передаємо e.target.checked, яке є НОВИМ СТАНОМ
+            toggleCompleteTask(parseInt(e.target.dataset.id), e.target.checked) 
         );
 
         taskContainer.appendChild(card);
@@ -523,6 +551,13 @@ if (addTaskBackground) {
     });
 }
 
+if (burgerMenu && navMenu) {
+    burgerMenu.addEventListener('click', () => {
+        // На сторінках завдань/адміна завжди очікується авторизований користувач
+        // Ми просто перемикаємо клас 'active' на меню користувача
+        navMenu.classList.toggle('active');
+    });
+}
 // Додатково: закриття модального вікна через кнопку "Скасувати" 
 // (Якщо ви додавали таку кнопку у HTML для зручності)
 // let cancelButton = document.querySelector('.add_task .button_cancel_card'); 

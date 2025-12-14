@@ -104,7 +104,16 @@ const COMPLETION_STATUSES = [
     { value: 'Виконане', text: 'Виконано' },
     { value: 'Активне', text: 'Не виконано' }
 ];
+// admin.js (НОВА ЛОГІКА БУРГЕР-МЕНЮ)
 
+// Перевіряємо, чи існує кнопка бургер-меню та меню користувача
+if (burgerMenu && navMenu) {
+    burgerMenu.addEventListener('click', () => {
+        // На сторінці адміна завжди очікується авторизований користувач
+        // Ми просто перемикаємо клас 'active' на меню користувача
+        navMenu.classList.toggle('active');
+    });
+}
 // -----------------------------------------------------------------
 // --- AUTH PROTECTION AND HEADER LOGIC ---
 // -----------------------------------------------------------------
@@ -171,7 +180,8 @@ async function renderDashboard() {
 
         const totalUsers = users.length;
         const totalTasks = tasks.length;
-        const completedTasks = tasks.filter(t => t.Status === 'Виконане').length;
+        // Обчислення кількості виконаних та невиконаних завдань
+        const completedTasks = tasks.filter(t => t.Status === 'Виконане').length; 
         const uncompletedTasks = totalTasks - completedTasks;
         const totalCategories = categories.length;
 
@@ -196,11 +206,10 @@ async function renderDashboard() {
                 <p class="name_inf no_m">Категорій: </p>
                 <p class="inf_p no_m">${totalCategories}</p>
             </div>
-        `;
-
+            `;
+        // ...
     } catch (error) {
-        console.error('Error rendering dashboard:', error);
-        dashInfo.innerHTML = `<p class="error_msg">Помилка завантаження даних дашборда: ${error.message}</p>`;
+        // ...
     }
 }
 

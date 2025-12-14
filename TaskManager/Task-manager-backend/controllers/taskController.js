@@ -73,42 +73,70 @@ exports.createTask = async (req, res) => {
 // 3. ОНОВЛЕННЯ ІСНУЮЧОГО ЗАВДАННЯ (PUT /api/tasks/:id)
 // -----------------------------------------------------------------
 exports.updateTask = async (req, res) => {
-    const userId = req.user.id;
+    // 1. Отримуємо ID завдання з параметрів URL та ID користувача з токена
     const taskId = req.params.id;
-    const { title, description, due_date, priority, status_name, category_id } = req.body;
+    const userId = req.user.id; 
     
+    // 2. Отримуємо всі можливі поля для оновлення
+    const { title, description, due_date, priority, category_id, status_id } = req.body;
+
+    // 3. Динамічна побудова SQL-запиту
+    const fields = [];
+    const values = [];
+
+    // Додаємо поля, якщо вони присутні у тілі запиту
+    if (title !== undefined) {
+        fields.push('Title = ?');
+        values.push(title);
+    }
+    if (description !== undefined) {
+        fields.push('Description = ?');
+        values.push(description);
+    }
+    if (due_date !== undefined) {
+        fields.push('DueDate = ?');
+        values.push(due_date);
+    }
+    if (priority !== undefined) {
+        fields.push('Priority = ?');
+        values.push(priority);
+    }
+    if (category_id !== undefined) {
+        fields.push('CategoryID = ?');
+        values.push(category_id);
+    }
+    if (status_id !== undefined) {
+        fields.push('StatusID = ?');
+        values.push(status_id);
+    }
+
+    // 4. Перевірка: чи є що оновлювати?
+    if (fields.length === 0) {
+        // Якщо полів немає, повертаємо 400 Bad Request
+        return res.status(400).json({ message: 'Немає полів для оновлення.' }); // Ви отримали цю помилку при запиті з image_cf7e59.png
+    }
+
     try {
-        let statusId;
-        // Якщо передано назву статусу, отримуємо його ID
-        if (status_name) {
-            statusId = await getStatusIdByName(status_name);
-        }
+        // 5. Формування кінцевого запиту
+        // Оновлюємо тільки ті завдання, які належать поточному користувачу (userId)
+        const updateQuery = `UPDATE Task SET ${fields.join(', ')} WHERE TaskID = ? AND UserID = ?`;
+        
+        values.push(taskId);
+        values.push(userId); 
 
-        const [result] = await pool.query(
-            `UPDATE Task SET 
-                Title = ?, Description = ?, DueDate = ?, Priority = ?, 
-                StatusID = COALESCE(?, StatusID), CategoryID = ? 
-            WHERE TaskID = ? AND UserID = ?`,
-            [title, description, due_date, priority, statusId, category_id, taskId, userId]
-        );
-
+        const [result] = await pool.query(updateQuery, values);
+        
         if (result.affectedRows === 0) {
-            // Перевіряємо, чи завдання існує, але не належить користувачу
-            const [check] = await pool.query('SELECT TaskID FROM Task WHERE TaskID = ?', [taskId]);
-            if (check.length === 0) {
-                 return res.status(404).json({ message: 'Завдання не знайдено.' });
-            }
-            return res.status(403).json({ message: 'У вас немає прав на редагування цього завдання.' });
+            return res.status(404).json({ message: 'Завдання не знайдено або у вас немає прав на його редагування.' });
         }
 
-        res.json({ message: 'Завдання успішно оновлено.' });
+        res.status(200).json({ message: 'Завдання успішно оновлено.' });
 
     } catch (error) {
-        console.error('Помилка при оновленні завдання:', error);
+        console.error('Помилка при оновленні завдання:', error); // Тут ви побачите реальну помилку MySQL
         res.status(500).json({ message: 'Помилка сервера.' });
     }
 };
-
 // -----------------------------------------------------------------
 // 4. ВИДАЛЕННЯ ЗАВДАННЯ (DELETE /api/tasks/:id)
 // -----------------------------------------------------------------

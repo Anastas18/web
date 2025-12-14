@@ -1,11 +1,9 @@
-// config/db.js
 
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Створення пулу підключень
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -14,7 +12,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
-}).promise(); // Використовуємо .promise() для роботи з async/await
+}).promise();
 
 console.log(`Connected to MySQL database: ${process.env.DB_NAME}`);
 
