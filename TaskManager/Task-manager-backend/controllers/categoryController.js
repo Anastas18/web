@@ -12,7 +12,7 @@ exports.getCategories = async (req, res) => {
     try {
         // Отримати всі категорії, які належать поточному користувачу
         const [categories] = await pool.query(
-            'SELECT CategoryID AS id, Name AS name, UserID AS user_id FROM Category WHERE UserID = ?', 
+            'SELECT CategoryID AS id, Name AS name, UserID AS user_id FROM Category WHERE UserID = ? OR UserID IS NULL', 
             [userId]
         );
 

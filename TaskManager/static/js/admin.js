@@ -13,6 +13,46 @@ const redirectToIndex = () => {
 const redirectToLogin = () => {
     window.location.href = 'login.html';
 };
+const getCurrentUserId = () => {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    return user ? user.id : null; 
+};
+
+async function apiFetch(endpoint, options = {}) {
+    const token = getAuthToken();
+    if (!token) {
+        // Якщо токена немає - викидаємо на логін
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers 
+    };
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers
+    });
+    
+    // Якщо токен прострочений або недійсний
+    if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+        return; 
+    }
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'API request failed');
+    }
+
+    // Обробка відповідей без тіла (наприклад, після видалення)
+    return response.json().catch(() => ({})); 
+}
 
 // Допоміжна функція для надсилання запитів з токеном
 async function adminApiFetch(endpoint, options = {}) {

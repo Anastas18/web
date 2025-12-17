@@ -264,7 +264,7 @@ if (saveTaskBtn) {
             description,
             priority,
             category_id: parseInt(category_id), 
-            due_date: due_date || null // Якщо порожнє, передаємо null
+            due_date: due_date || null 
         };
         
         try {
@@ -274,22 +274,27 @@ if (saveTaskBtn) {
                     method: 'PUT',
                     body: JSON.stringify(taskData)
                 });
-                alert('Завдання успішно оновлено!');
+                // alert('Завдання успішно оновлено!'); // Можна прибрати, щоб не дратувало
             } else {
                 // СТВОРЕННЯ (POST)
                 await apiFetch('/tasks', {
                     method: 'POST',
                     body: JSON.stringify(taskData)
                 });
-                alert('Завдання успішно створено!');
             }
 
-            // Очищення форми
+            // Очищення та закриття
             clearTaskForm();
             editingTaskId = null;
             
-            // Перезавантаження списку завдань
-            fetchAndRenderTasks();
+            // ЗАКРИВАЄМО ВІКНО ПІСЛЯ ЗБЕРЕЖЕННЯ
+            if (addTaskBackground) addTaskBackground.classList.remove('active');
+
+            // Повертаємо текст кнопки назад
+            if (saveTaskBtn) saveTaskBtn.textContent = 'Зберегти';
+            
+            // Перезавантаження списку
+            fetchAndRenderTasks(document.querySelector('.p_filtr').dataset.filter || 'all');
 
         } catch (error) {
             console.error('Task save error:', error);
@@ -346,10 +351,10 @@ async function deleteTask(taskId) {
     }
 }
 
-// 5. EDIT (Завантажити дані завдання у форму)
+// 5. EDIT (Завантажити дані завдання у форму та ВІДКРИТИ МОДАЛКУ)
 async function editTask(taskId) {
     try {
-        // Отримуємо всі завдання, потім знаходимо потрібне
+        // 1. Отримуємо свіжі дані (можна оптимізувати, беручи з існуючого списку, але так надійніше)
         const allTasks = await apiFetch('/tasks');
         const taskToEdit = allTasks.find(t => t.TaskID === taskId);
 
@@ -358,23 +363,35 @@ async function editTask(taskId) {
             return;
         }
 
-        // Заповнюємо форму
+        // 2. Встановлюємо ID редагованого завдання
         editingTaskId = taskId;
-        taskNameInput.value = taskToEdit.Title;
+
+        // 3. Заповнюємо поля форми
+        if (taskNameInput) taskNameInput.value = taskToEdit.Title;
         if (taskDescInput) taskDescInput.value = taskToEdit.Description || '';
-        taskDeadlineInput.value = taskToEdit.DueDate ? new Date(taskToEdit.DueDate).toISOString().substring(0, 10) : '';
-        taskPrioritySelect.value = taskToEdit.Priority;
         
-        // Знаходимо CategoryID за назвою (потрібно додати CategoryID до taskToEdit у бекенді)
-        const category = allCategories.find(c => c.name === taskToEdit.Category);
-        if (category) {
-            taskCategorySelect.value = category.id;
+        // Форматуємо дату для input type="date" (YYYY-MM-DD)
+        if (taskDeadlineInput && taskToEdit.DueDate) {
+            taskDeadlineInput.value = new Date(taskToEdit.DueDate).toISOString().substring(0, 10);
         }
 
-        if (saveTaskBtn) saveTaskBtn.textContent = 'Оновити завдання';
+        if (taskPrioritySelect) taskPrioritySelect.value = taskToEdit.Priority;
         
-        // Прокрутка до форми
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Знаходимо ID категорії по назві (бо бекенд повертає назву, а селект хоче ID)
+        if (taskCategorySelect && allCategories.length > 0) {
+            const category = allCategories.find(c => c.name === taskToEdit.Category);
+            if (category) {
+                taskCategorySelect.value = category.id;
+            }
+        }
+
+        // 4. Змінюємо текст кнопки збереження
+        if (saveTaskBtn) saveTaskBtn.textContent = 'Оновити завдання';
+
+        // 5. ГОЛОВНЕ: Відкриваємо модальне вікно!
+        if (addTaskBackground) {
+            addTaskBackground.classList.add('active');
+        }
 
     } catch (error) {
         console.error('Error loading task for editing:', error);
@@ -468,8 +485,21 @@ function initializePage() {
     }
 
     // Оновлення UI (для tasks.html)
+    // Оновлення UI
     if (userNameDisplay) userNameDisplay.textContent = user.name;
-    if (adminLink) adminLink.style.display = user.role === 'admin' ? 'block' : 'none';
+
+    // ВИПРАВЛЕНИЙ БЛОК:
+    if (user.role === 'admin') {
+        if (adminLink) adminLink.style.display = 'block'; // Показуємо посилання
+        if (userPanel && adminPanel) {
+            // Додаємо клік на фото, щоб відкрити меню адміна
+            userPanel.addEventListener('click', () => {
+                adminPanel.classList.toggle('active');
+            });
+        }
+    } else {
+        if (adminLink) adminLink.style.display = 'none';
+    }
 
     // Завантаження категорій та завдань
     populatePrioritySelect();
